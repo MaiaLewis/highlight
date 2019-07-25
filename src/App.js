@@ -22,6 +22,8 @@ class App extends Component {
     fetch("https://highlight-search.herokuapp.com/search").then(
       console.log("yay"),
       result => {
+        console.log("result");
+        console.log(result);
         window.location.href = result;
       },
       error => {
