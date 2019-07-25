@@ -9,7 +9,7 @@ import json
 app = flask.Flask(__name__, static_folder="build/static",
                   template_folder="build")
 app.secret_key = "secret"
-# CORS(app)
+#CORS(app)
 
 
 @app.route('/')
