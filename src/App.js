@@ -19,9 +19,13 @@ class App extends Component {
   };
 
   componentDidMount() {
-    fetch("https://highlight-search.herokuapp.com/search").then(function(data) {
-      console.log(data);
-    });
+    fetch("https://highlight-search.herokuapp.com/search")
+      .then(function(response) {
+        return response.json();
+      })
+      .then(function(myJson) {
+        window.location.href = myJson.url;
+      });
   }
 
   render() {

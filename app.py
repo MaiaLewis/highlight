@@ -77,7 +77,7 @@ def oauth2callback():
         print("state")
         print(state)
         # return flask.redirect(authorization_url)
-        url ={"url": authorization_url}
+        url = {"url": authorization_url}
         url = json.dumps(url)
         return url
     else:
