@@ -9,7 +9,7 @@ import json
 app = flask.Flask(__name__, static_folder="build/static",
                   template_folder="build")
 app.secret_key = "secret"
-#CORS(app)
+# CORS(app)
 
 
 @app.route('/')
@@ -62,30 +62,30 @@ def search():
     return dummy_results
 
 
+@app.route('/authorize')
+def authorize():
+    flow = Flow.from_client_secrets_file(
+        'credentials.json',
+        scopes=['https://www.googleapis.com/auth/drive.metadata.readonly'],
+        redirect_uri=flask.url_for('oauth2callback', _external=True))
+    authorization_url, state = flow.authorization_url(
+        access_type='offline', include_granted_scopes='true')
+    flask.session['state'] = state
+    return authorization_url
+
+
 @app.route('/oauth2callback')
 def oauth2callback():
     flow = Flow.from_client_secrets_file(
         'credentials.json',
         scopes=['https://www.googleapis.com/auth/drive.metadata.readonly'],
         redirect_uri=flask.url_for('oauth2callback', _external=True))
-    if 'code' not in flask.request.args:
-        authorization_url, state = flow.authorization_url(
-            include_granted_scopes='true')
-        print("url")
-        print(authorization_url)
-        flask.session['state'] = state
-        print("state")
-        print(state)
-        return flask.redirect(authorization_url)
-    else:
-        auth_code = flask.request.args.get('code')
-        print("code")
-        print(auth_code)
-        flow.fetch_token(authorization_response=auth_code)
-        credentials = flow.credentials
-        flask.session['credentials'] = {'token': credentials.token, 'refresh_token': credentials.refresh_token, 'token_uri': credentials.token_uri,
-                                        'client_id': credentials.client_id, 'client_secret': credentials.client_secret, 'scopes': credentials.scopes}
-        return flask.redirect(flask.url_for('index'))
+    authorization_response = flask.request.url
+    flow.fetch_token(authorization_response=authorization_response)
+    credentials = flow.credentials
+    flask.session['credentials'] = {'token': credentials.token, 'refresh_token': credentials.refresh_token, 'token_uri': credentials.token_uri,
+                                    'client_id': credentials.client_id, 'client_secret': credentials.client_secret, 'scopes': credentials.scopes}
+    return flask.redirect(flask.url_for('search'))
 
 
 if __name__ == '__main__':

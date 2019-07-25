@@ -22,11 +22,9 @@ class App extends Component {
     fetch("https://highlight-search.herokuapp.com/search")
       .then(res => res.json())
       .then(
+        console.log("yay"),
         result => {
-          this.setState({
-            isLoaded: true,
-            results: result
-          });
+          window.location.href = result;
         },
         error => {
           this.setState({

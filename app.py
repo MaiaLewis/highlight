@@ -9,7 +9,7 @@ import json
 app = flask.Flask(__name__, static_folder="build/static",
                   template_folder="build")
 app.secret_key = "secret"
-# CORS(app)
+CORS(app)
 
 
 @app.route('/')
@@ -76,7 +76,8 @@ def oauth2callback():
         flask.session['state'] = state
         print("state")
         print(state)
-        return flask.redirect(authorization_url)
+        # return flask.redirect(authorization_url)
+        return authorization_url
     else:
         auth_code = flask.request.args.get('code')
         print("code")
