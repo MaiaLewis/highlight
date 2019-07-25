@@ -19,20 +19,18 @@ class App extends Component {
   };
 
   componentDidMount() {
-    fetch("https://highlight-search.herokuapp.com/search")
-      .then(res => res.json())
-      .then(
-        console.log("yay"),
-        result => {
-          window.location.href = result;
-        },
-        error => {
-          this.setState({
-            isLoaded: true,
-            error
-          });
-        }
-      );
+    fetch("https://highlight-search.herokuapp.com/search").then(
+      console.log("yay"),
+      result => {
+        window.location.href = result;
+      },
+      error => {
+        this.setState({
+          isLoaded: true,
+          error
+        });
+      }
+    );
   }
 
   render() {
