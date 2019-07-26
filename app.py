@@ -51,9 +51,9 @@ def search():
         print("credentials")
         print(credentials)
         print('now calling fetch')
-        service = build('drive', 'v3', credentials=credentials)
-        results = service.files().list(
-            pageSize=10, fields="nextPageToken, files(id, name)").execute()
+        drive = build('drive', 'v3', credentials=credentials)
+        results = drive.files().list(
+            pageSize=10, fields="nextPageToken, files(id, name, owners, modifiedTime").execute()
         items = results.get('files', [])
         if not items:
             print('No files found.')

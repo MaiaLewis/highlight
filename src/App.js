@@ -23,11 +23,15 @@ class App extends Component {
       .then(function(response) {
         return response.json();
       })
-      .then(function(myJson) {
-        if ("url" in myJson) {
-          window.location.href = myJson.url;
+      .then(function(results) {
+        if ("url" in results) {
+          window.location.href = results.url;
         } else {
-          console.log("sucess");
+          console.log("success");
+          this.setState({
+            isLoaded: true,
+            items: results
+          });
         }
       });
   }
