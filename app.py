@@ -22,7 +22,7 @@ def index():
 
 @app.route('/search')
 def search():
-    results = [
+    documents = [
         {
             "id": 1,
             "title": "Document Title",
@@ -43,16 +43,16 @@ def search():
         items = results.get('files', [])
         for item in items:
             print(item)
-            result = {
+            document = {
                 "id": item["id"],
                 "title": item["name"],
                 "topics": ["Topic 1", "Topic 2", "Topic 3"],
                 "author": item["owners"][0]["displayName"],
                 "last_edit": item["modifiedTime"]
             }
-            results.append(result)
-    results = json.dumps(results)
-    return results
+            documents.append(document)
+    documents = json.dumps(documents)
+    return documents
 
 
 @app.route('/oauth2callback')
