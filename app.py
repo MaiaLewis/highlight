@@ -50,20 +50,17 @@ def search():
         credentials = Credentials(**flask.session['credentials'])
         print("credentials")
         print(credentials)
-        if credentials.access_token_expired:
-            return flask.redirect(flask.url_for('oauth2callback'))
+        print('now calling fetch')
+        service = build('drive', 'v3', credentials=credentials)
+        results = service.files().list(
+            pageSize=10, fields="nextPageToken, files(id, name)").execute()
+        items = results.get('files', [])
+        if not items:
+            print('No files found.')
         else:
-            print('now calling fetch')
-            service = build('drive', 'v3', credentials=credentials)
-            results = service.files().list(
-                pageSize=10, fields="nextPageToken, files(id, name)").execute()
-            items = results.get('files', [])
-            if not items:
-                print('No files found.')
-            else:
-                print('Files:')
-                for item in items:
-                    print(item)
+            print('Files:')
+            for item in items:
+                print(item)
     dummy_results = json.dumps(dummy_results)
     return dummy_results
 
@@ -101,8 +98,3 @@ def oauth2callback():
 
 if __name__ == '__main__':
     app.run()
-
-
-def random_string(length=10):
-    password_characters = string.ascii_letters + string.digits + string.punctuation
-    return ''.join(random.choice(password_characters) for i in range(length))
