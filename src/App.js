@@ -19,7 +19,7 @@ class App extends Component {
   };
 
   componentDidMount() {
-    fetch("https://highlight-search.herokuapp.com/search")
+    fetch("http://127.0.0.1:5000/search")
       .then(function(response) {
         return response.json();
       })

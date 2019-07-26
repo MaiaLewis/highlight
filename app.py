@@ -81,14 +81,16 @@ def oauth2callback():
         url = json.dumps(url)
         return url
     else:
-        auth_code = flask.request.args.get('code')
+        auth_code = flask.request.url
         print("code")
         print(auth_code)
         flow.fetch_token(authorization_response=auth_code)
         credentials = flow.credentials
+        print("credentials")
+        print(credentials)
         flask.session['credentials'] = {'token': credentials.token, 'refresh_token': credentials.refresh_token, 'token_uri': credentials.token_uri,
                                         'client_id': credentials.client_id, 'client_secret': credentials.client_secret, 'scopes': credentials.scopes}
-        return flask.redirect(flask.url_for('index'))
+        return flask.redirect(flask.url_for('search'))
 
 
 if __name__ == '__main__':
