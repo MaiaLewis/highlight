@@ -44,11 +44,11 @@ def search():
         for item in items:
             print(item)
             result = {
-                "id": item.id,
-                "title": item.name,
+                "id": item["id"],
+                "title": item["name"],
                 "topics": ["Topic 1", "Topic 2", "Topic 3"],
-                "author": item.owners[0]["displayName"],
-                "last_edit": item.modifiedTime
+                "author": item["owners"][0]["displayName"],
+                "last_edit": item["modifiedTime"]
             }
             results.append(result)
     results = json.dumps(results)
