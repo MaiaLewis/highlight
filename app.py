@@ -93,7 +93,7 @@ def oauth2callback():
         print(credentials)
         flask.session['credentials'] = {'token': credentials.token, 'refresh_token': credentials.refresh_token, 'token_uri': credentials.token_uri,
                                         'client_id': credentials.client_id, 'client_secret': credentials.client_secret, 'scopes': credentials.scopes}
-        return flask.redirect(flask.url_for('search'))
+        return flask.redirect(flask.url_for('index'))
 
 
 if __name__ == '__main__':

@@ -24,7 +24,11 @@ class App extends Component {
         return response.json();
       })
       .then(function(myJson) {
-        window.location.href = myJson.url;
+        if ("url" in myJson) {
+          window.location.href = myJson.url;
+        } else {
+          console.log("sucess");
+        }
       });
   }
 
