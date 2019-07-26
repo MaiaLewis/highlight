@@ -29,7 +29,7 @@ class App extends Component {
             console.log("success");
             this.setState({
               isLoaded: true,
-              items: results
+              results: results
             });
           }
         },
