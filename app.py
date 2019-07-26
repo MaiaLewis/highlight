@@ -22,23 +22,9 @@ def index():
 
 @app.route('/search')
 def search():
-    dummy_results = [
+    results = [
         {
             "id": 1,
-            "title": "Document Title",
-            "topics": ["Topic 1", "Topic 2", "Topic 3"],
-            "author": "Author Name",
-            "last_edit": "yyyy-mm-ddThh:mm:ss.ffffff"
-        },
-        {
-            "id": 2,
-            "title": "Document Title",
-            "topics": ["Topic 1", "Topic 2", "Topic 3"],
-            "author": "Author Name",
-            "last_edit": "yyyy-mm-ddThh:mm:ss.ffffff"
-        },
-        {
-            "id": 3,
             "title": "Document Title",
             "topics": ["Topic 1", "Topic 2", "Topic 3"],
             "author": "Author Name",
@@ -53,16 +39,20 @@ def search():
         print('now calling fetch')
         drive = build('drive', 'v3', credentials=credentials)
         results = drive.files().list(
-            pageSize=10, fields="nextPageToken, files(id, name, owners, modifiedTime").execute()
+            pageSize=10, fields="nextPageToken, files(id, name, modifiedTime").execute()
         items = results.get('files', [])
-        if not items:
-            print('No files found.')
-        else:
-            print('Files:')
-            for item in items:
-                print(item)
-    dummy_results = json.dumps(dummy_results)
-    return dummy_results
+        for item in items:
+            print(item)
+            result = {
+                "id": item.id,
+                "title": item.name,
+                "topics": ["Topic 1", "Topic 2", "Topic 3"],
+                "author": "author",
+                "last_edit": item.modifiedTime
+            }
+            results.append(result)
+    results = json.dumps(results)
+    return results
 
 
 @app.route('/oauth2callback')
