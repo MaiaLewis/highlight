@@ -4,6 +4,7 @@ import os
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import Flow
 from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
 import json
 import random
 import string
@@ -43,23 +44,26 @@ def search():
             "author": "Author Name",
             "last_edit": "yyyy-mm-ddThh:mm:ss.ffffff"
         }]
-    credentials = flask.session.get('credentials')
-    if not credentials:
-        return flask.redirect(flask.url_for('oauth2callback'))
-    elif credentials.access_token_expired:
+    if 'credentials' not in flask.session:
         return flask.redirect(flask.url_for('oauth2callback'))
     else:
-        print('now calling fetch')
-        service = build('drive', 'v3', credentials=credentials)
-        results = service.files().list(
-            pageSize=10, fields="nextPageToken, files(id, name)").execute()
-        items = results.get('files', [])
-        if not items:
-            print('No files found.')
+        credentials = Credentials(**flask.session['credentials'])
+        print("credentials")
+        print(credentials)
+        if credentials.access_token_expired:
+            return flask.redirect(flask.url_for('oauth2callback'))
         else:
-            print('Files:')
-            for item in items:
-                print(item)
+            print('now calling fetch')
+            service = build('drive', 'v3', credentials=credentials)
+            results = service.files().list(
+                pageSize=10, fields="nextPageToken, files(id, name)").execute()
+            items = results.get('files', [])
+            if not items:
+                print('No files found.')
+            else:
+                print('Files:')
+                for item in items:
+                    print(item)
     dummy_results = json.dumps(dummy_results)
     return dummy_results
 
