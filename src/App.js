@@ -7,15 +7,7 @@ class App extends Component {
   state = {
     error: null,
     isLoaded: false,
-    results: [
-      {
-        id: 1,
-        title: "Didn't work",
-        topics: ["Topic 1", "Topic 2", "Topic 3"],
-        author: "Author Name",
-        last_edit: "yyyy-mm-ddThh:mm:ss.ffffff"
-      }
-    ]
+    results: []
   };
 
   componentDidMount() {
@@ -26,7 +18,6 @@ class App extends Component {
           if ("url" in results) {
             window.location.href = results.url;
           } else {
-            console.log("success");
             this.setState({
               isLoaded: true,
               results: results

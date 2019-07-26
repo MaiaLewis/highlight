@@ -22,21 +22,11 @@ def index():
 
 @app.route('/search')
 def search():
-    documents = [
-        {
-            "id": 1,
-            "title": "Document Title",
-            "topics": ["Topic 1", "Topic 2", "Topic 3"],
-            "author": "Author Name",
-            "last_edit": "yyyy-mm-ddThh:mm:ss.ffffff"
-        }]
+    documents = []
     if 'credentials' not in flask.session:
         return flask.redirect(flask.url_for('oauth2callback'))
     else:
         credentials = Credentials(**flask.session['credentials'])
-        print("credentials")
-        print(credentials)
-        print('now calling fetch')
         drive = build('drive', 'v3', credentials=credentials)
         results = drive.files().list(
             pageSize=10, fields="nextPageToken, files(id, name, owners(displayName), modifiedTime)").execute()
@@ -64,25 +54,21 @@ def oauth2callback():
     if 'code' not in flask.request.args:
         authorization_url, state = flow.authorization_url(
             include_granted_scopes='true')
-        print("url")
-        print(authorization_url)
         flask.session['state'] = state
-        print("state")
-        print(state)
-        # return flask.redirect(authorization_url)
         url = {"url": authorization_url}
         url = json.dumps(url)
         return url
     else:
         auth_code = flask.request.url
-        print("code")
-        print(auth_code)
         flow.fetch_token(authorization_response=auth_code)
         credentials = flow.credentials
-        print("credentials")
-        print(credentials)
-        flask.session['credentials'] = {'token': credentials.token, 'refresh_token': credentials.refresh_token, 'token_uri': credentials.token_uri,
-                                        'client_id': credentials.client_id, 'client_secret': credentials.client_secret, 'scopes': credentials.scopes}
+        flask.session['credentials'] = {
+            'token': credentials.token,
+            'refresh_token': credentials.refresh_token,
+            'token_uri': credentials.token_uri,
+            'client_id': credentials.client_id,
+            'client_secret': credentials.client_secret,
+            'scopes': credentials.scopes}
         return flask.redirect(flask.url_for('index'))
 
 
