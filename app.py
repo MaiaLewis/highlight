@@ -39,7 +39,7 @@ def search():
         print('now calling fetch')
         drive = build('drive', 'v3', credentials=credentials)
         results = drive.files().list(
-            pageSize=10, fields="nextPageToken, files(id, name, modifiedTime").execute()
+            pageSize=10, fields="nextPageToken, files(id, name, owners(displayName), modifiedTime)").execute()
         items = results.get('files', [])
         for item in items:
             print(item)
@@ -47,7 +47,7 @@ def search():
                 "id": item.id,
                 "title": item.name,
                 "topics": ["Topic 1", "Topic 2", "Topic 3"],
-                "author": "author",
+                "author": item.owners[0]["displayName"],
                 "last_edit": item.modifiedTime
             }
             results.append(result)
