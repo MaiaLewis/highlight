@@ -5,6 +5,7 @@ from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import Flow
 from google.auth.transport.requests import Request
 import json
+import random
 
 app = flask.Flask(__name__, static_folder="build/static",
                   template_folder="build")
@@ -67,7 +68,7 @@ def oauth2callback():
     flow = Flow.from_client_secrets_file(
         'credentials.json',
         scopes=['https://www.googleapis.com/auth/drive.metadata.readonly'],
-        redirect_uri=flask.url_for('oauth2callback', _external=True))
+        redirect_uri=flask.url_for('oauth2callback', _external=True, code_verifier=random.randint(1, 999999)))
     if 'code' not in flask.request.args:
         authorization_url, state = flow.authorization_url(
             include_granted_scopes='true')
