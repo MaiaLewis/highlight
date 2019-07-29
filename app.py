@@ -28,7 +28,7 @@ def search():
     else:
         credentials = Credentials(**flask.session['credentials'])
         drive = build('drive', 'v3', credentials=credentials)
-        results = drive.files().list(
+        results = drive.files().list(  # pylint: disable=no-member
             pageSize=10, fields="nextPageToken, files(id, name, owners(displayName), modifiedTime)").execute()
         items = results.get('files', [])
         for item in items:
@@ -53,7 +53,7 @@ def oauth2callback():
         redirect_uri=flask.url_for('oauth2callback', _external=True))
     if 'code' not in flask.request.args:
         authorization_url, state = flow.authorization_url(
-            include_granted_scopes='true')
+            access_type='offline', include_granted_scopes='true')
         flask.session['state'] = state
         url = {"url": authorization_url}
         url = json.dumps(url)
