@@ -43,11 +43,13 @@ def search():
         items = results.get('files', [])
         session = driver.session()
         query = ""
+        index = 0
         for item in items:
-            node = "CREATE (n:Document {{title: '{}', author: '{}', last_edit: '{}'}}) ".format(
-                item["name"], item["owners"][0]["displayName"], item["modifiedTime"])
+            node = "CREATE ({}:Document {{title: '{}', author: '{}', last_edit: '{}'}}) ".format(
+                index, item["name"], item["owners"][0]["displayName"], item["modifiedTime"])
             print(node)
             query = query + node
+            index += 1
         session.run(query)
         # query graph for documents
         items = session.run(
