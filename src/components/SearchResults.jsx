@@ -7,7 +7,7 @@ class SearchResults extends Component {
     return (
       <div>
         {results.map(result => (
-          <Result key={result.id} result={result} />
+          <Result key={result.title} result={result} />
         ))}
       </div>
     );

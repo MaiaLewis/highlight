@@ -54,11 +54,10 @@ def search():
         documents = []
         for item in items:
             document = {
-                "id": item["id"],
-                "title": item["name"],
+                "title": item["title"],
                 "topics": ["Topic 1", "Topic 2", "Topic 3"],
-                "author": item["owners"][0]["displayName"],
-                "last_edit": item["modifiedTime"]
+                "author": item["author"],
+                "last_edit": item["last_edit"]
             }
             documents.append(document)
     session.close()
