@@ -45,8 +45,9 @@ def search():
         query = ""
         index = 0
         for item in items:
+            variable = str(index)
             node = "CREATE ({}:Document {{title: '{}', author: '{}', last_edit: '{}'}}) ".format(
-                index, item["name"], item["owners"][0]["displayName"], item["modifiedTime"])
+                variable, item["name"], item["owners"][0]["displayName"], item["modifiedTime"])
             print(node)
             query = query + node
             index += 1
