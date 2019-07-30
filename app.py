@@ -44,7 +44,7 @@ def search():
         session = driver.session()
         query = ""
         for item in items:
-            node = "CREATE (n:Document {{title: {}, author: {}, last_edit: {}}}) ".format(
+            node = "CREATE (n:Document {{title: '{}', author: '{}', last_edit: '{}'}}) ".format(
                 item["name"], item["owners"][0]["displayName"], item["modifiedTime"])
             print(node)
             query = query + node
