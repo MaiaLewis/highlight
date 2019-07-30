@@ -48,9 +48,11 @@ def search():
                 item["name"], item["name"], item["owners"][0]["displayName"], item["modifiedTime"])
             print(node)
             query = query + node
+        session.run(query)
         # query graph for documents
         items = session.run(
             "MATCH (n:Document) RETURN n.title AS title, n.author AS author, n.last_edit AS last_edit")
+        print(items)
         documents = []
         for item in items:
             document = {
