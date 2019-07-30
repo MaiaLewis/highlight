@@ -44,7 +44,7 @@ def search():
         session = driver.session()
         for item in items:
             node = "CREATE (n:Document {{title: '{}', author: '{}', last_edit: '{}'}}) ".format(
-                variable, item["name"], item["owners"][0]["displayName"], item["modifiedTime"])
+                item["name"], item["owners"][0]["displayName"], item["modifiedTime"])
             print(node)
             session.run(node)
         # query graph for documents
