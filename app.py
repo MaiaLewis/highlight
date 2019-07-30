@@ -30,17 +30,29 @@ def index():
 
 @app.route('/search')
 def search():
-    documents = []
     if 'credentials' not in flask.session:
+        # redirect to authorize user
         return flask.redirect(flask.url_for('oauth2callback'))
     else:
+        # connect to Drive API
         credentials = Credentials(**flask.session['credentials'])
         drive = build('drive', 'v3', credentials=credentials)
         results = drive.files().list(  # pylint: disable=no-member
             pageSize=10, fields="nextPageToken, files(id, name, owners(displayName), modifiedTime)").execute()
+        # save documents to Graph
         items = results.get('files', [])
+        session = driver.session()
+        query = ""
         for item in items:
-            print(item)
+            node = "CREATE ({}:Document {{title: {}, author: {}, last_edit: {}}}) ".format(
+                item["name"], item["name"], item["owners"][0]["displayName"], item["modifiedTime"])
+            print(node)
+            query = query + node
+        # query graph for documents
+        items = session.run(
+            "MATCH (n:Document) RETURN n.title AS title, n.author AS author, n.last_edit AS last_edit")
+        documents = []
+        for item in items:
             document = {
                 "id": item["id"],
                 "title": item["name"],
@@ -49,11 +61,6 @@ def search():
                 "last_edit": item["modifiedTime"]
             }
             documents.append(document)
-    session = driver.session()
-    session.run("CREATE (n:Person {name:'Bob'})")
-    result = session.run("MATCH (n:Person) RETURN n.name AS name")
-    for record in result:
-        print(record["name"])
     session.close()
     documents = json.dumps(documents)
     return documents
