@@ -5,6 +5,7 @@ from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import Flow
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
+from neo4j.v1 import GraphDatabase, basic_auth
 import json
 import random
 import string
@@ -13,6 +14,13 @@ app = flask.Flask(__name__, static_folder="build/static",
                   template_folder="build")
 app.secret_key = "secret"
 CORS(app)
+
+graphenedb_url = os.environ.get("GRAPHENEDB_BOLT_URL")
+graphenedb_user = os.environ.get("GRAPHENEDB_BOLT_USER")
+graphenedb_pass = os.environ.get("GRAPHENEDB_BOLT_PASSWORD")
+
+driver = GraphDatabase.driver(
+    graphenedb_url, auth=basic_auth(graphenedb_user, graphenedb_pass))
 
 
 @app.route('/')
@@ -41,6 +49,12 @@ def search():
                 "last_edit": item["modifiedTime"]
             }
             documents.append(document)
+    session = driver.session()
+    session.run("CREATE (n:Person {name:'Bob'})")
+    result = session.run("MATCH (n:Person) RETURN n.name AS name")
+    for record in result:
+        print(record["name"])
+    session.close()
     documents = json.dumps(documents)
     return documents
 
