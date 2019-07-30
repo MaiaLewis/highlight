@@ -41,7 +41,7 @@ def search():
             pageSize=10, fields="nextPageToken, files(id, name, owners(displayName), modifiedTime)").execute()
         # save documents to Graph
         items = results.get('files', [])
-        session = driver.session()
+        session = driver.session()  # pylint: disable=assignment-from-no-return
         for item in items:
             node = "CREATE (n:Document {{title: '{}', author: '{}', last_edit: '{}'}}) ".format(
                 item["name"], item["owners"][0]["displayName"], item["modifiedTime"])
