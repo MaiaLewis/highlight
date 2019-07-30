@@ -42,16 +42,11 @@ def search():
         # save documents to Graph
         items = results.get('files', [])
         session = driver.session()
-        query = ""
-        index = 0
         for item in items:
-            variable = str(index)
-            node = "CREATE ({}:Document {{title: '{}', author: '{}', last_edit: '{}'}}) ".format(
+            node = "CREATE (n:Document {{title: '{}', author: '{}', last_edit: '{}'}}) ".format(
                 variable, item["name"], item["owners"][0]["displayName"], item["modifiedTime"])
             print(node)
-            query = query + node
-            index += 1
-        session.run(query)
+            session.run(node)
         # query graph for documents
         items = session.run(
             "MATCH (n:Document) RETURN n.title AS title, n.author AS author, n.last_edit AS last_edit")
