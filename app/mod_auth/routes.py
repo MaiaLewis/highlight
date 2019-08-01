@@ -1,17 +1,33 @@
 import flask
+import os
+from google_auth_oauthlib.flow import Flow
 import json
-import string
 
 mod_auth = flask.Blueprint('auth', __name__, url_prefix='/auth')
 
 
-@mod_auth.route('/search')
-def search():
-    documents = [{
-        "title": "TITLE",
-        "topics": ["Topic 1", "Topic 2", "Topic 3"],
-        "author": "AUTHOR",
-        "last_edit": "DATE"
-    }]
-    documents = json.dumps(documents)
-    return documents
+@mod_auth.route('/oauth2callback')
+def oauth2callback():
+    flow = Flow.from_client_secrets_file(
+        'credentials.json',
+        scopes=['https://www.googleapis.com/auth/drive.metadata.readonly'],
+        redirect_uri=flask.url_for('oauth2callback', _external=True))
+    if 'code' not in flask.request.args:
+        authorization_url, state = flow.authorization_url(
+            access_type='offline', include_granted_scopes='true')
+        flask.session['state'] = state
+        url = {"url": authorization_url}
+        url = json.dumps(url)
+        return url
+    else:
+        auth_code = flask.request.url
+        flow.fetch_token(authorization_response=auth_code)
+        credentials = flow.credentials
+        flask.session['credentials'] = {
+            'token': credentials.token,
+            'refresh_token': credentials.refresh_token,
+            'token_uri': credentials.token_uri,
+            'client_id': credentials.client_id,
+            'client_secret': credentials.client_secret,
+            'scopes': credentials.scopes}
+        return flask.redirect(flask.url_for('index'))
