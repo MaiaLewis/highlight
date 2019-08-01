@@ -11,7 +11,7 @@ class App extends Component {
   };
 
   componentDidMount() {
-    fetch("https://highlight-search.herokuapp.com/search")
+    fetch("https://highlight-search.herokuapp.com/auth/search")
       .then(res => res.json())
       .then(
         results => {
