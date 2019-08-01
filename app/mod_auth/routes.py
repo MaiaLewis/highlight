@@ -10,10 +10,8 @@ import json
 import random
 import string
 
-app = flask.Flask(__name__, static_folder="build/static",
-                  template_folder="build")
-app.secret_key = "secret"
-CORS(app)
+mod_auth = flask.Blueprint('auth', __name__, url_prefix='/auth')
+
 
 graphenedb_url = os.environ.get("GRAPHENEDB_BOLT_URL")
 graphenedb_user = os.environ.get("GRAPHENEDB_BOLT_USER")
@@ -23,12 +21,12 @@ driver = GraphDatabase.driver(
     graphenedb_url, auth=basic_auth(graphenedb_user, graphenedb_pass))
 
 
-@app.route('/')
+@mod_auth.route('/')
 def index():
     return flask.render_template("index.html")
 
 
-@app.route('/search')
+@mod_auth.route('/search')
 def search():
     if 'credentials' not in flask.session:
         # redirect to authorize user
@@ -45,12 +43,10 @@ def search():
         for item in items:
             node = "CREATE (n:Document {{title: '{}', author: '{}', last_edit: '{}'}}) ".format(
                 item["name"], item["owners"][0]["displayName"], item["modifiedTime"])
-            print(node)
             session.run(node)
         # query graph for documents
         items = session.run(
             "MATCH (n:Document) RETURN n.title AS title, n.author AS author, n.last_edit AS last_edit")
-        print(items)
         documents = []
         for item in items:
             document = {
@@ -65,7 +61,7 @@ def search():
     return documents
 
 
-@app.route('/oauth2callback')
+@mod_auth.route('/oauth2callback')
 def oauth2callback():
     flow = Flow.from_client_secrets_file(
         'credentials.json',
@@ -90,7 +86,3 @@ def oauth2callback():
             'client_secret': credentials.client_secret,
             'scopes': credentials.scopes}
         return flask.redirect(flask.url_for('index'))
-
-
-if __name__ == '__main__':
-    app.run()
