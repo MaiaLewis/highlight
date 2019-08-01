@@ -21,7 +21,7 @@ driver = GraphDatabase.driver(
 def search():
     if 'credentials' not in flask.session:
         # redirect to authorize user
-        return flask.redirect(flask.url_for('oauth2callback'))
+        return flask.redirect(flask.url_for('auth.oauth2callback'))
     else:
         # connect to Drive API
         credentials = Credentials(**flask.session['credentials'])
