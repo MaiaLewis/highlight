@@ -1,7 +1,5 @@
 import flask
 import os
-from googleapiclient.discovery import build
-from google.oauth2.credentials import Credentials
 from neo4j.v1 import GraphDatabase, basic_auth
 import json
 import string

@@ -1,6 +1,6 @@
 import flask
-from app.mod_auth.routes import mod_auth as auth_module
-from app.mod_save.routes import mod_save as save_module
+from app.mod_auth.auth import mod_auth as auth_module
+from app.mod_save.save import mod_save as save_module
 from flask_cors import CORS
 
 app = flask.Flask(__name__, static_folder="../build/static",
