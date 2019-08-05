@@ -1,7 +1,6 @@
 import flask
 import os
 from googleapiclient.discovery import build
-# from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from neo4j.v1 import GraphDatabase, basic_auth
 import json
@@ -35,18 +34,5 @@ def search():
             node = "CREATE (n:Document {{title: '{}', author: '{}', last_edit: '{}'}}) ".format(
                 item["name"], item["owners"][0]["displayName"], item["modifiedTime"])
             session.run(node)
-        # query graph for documents
-        items = session.run(
-            "MATCH (n:Document) RETURN n.title AS title, n.author AS author, n.last_edit AS last_edit")
-        documents = []
-        for item in items:
-            document = {
-                "title": item["title"],
-                "topics": ["Topic 1", "Topic 2", "Topic 3"],
-                "author": item["author"],
-                "last_edit": item["last_edit"]
-            }
-            documents.append(document)
     session.close()
-    documents = json.dumps(documents)
-    return documents
+    return flask.redirect(flask.url_for('auth/search.search'))
