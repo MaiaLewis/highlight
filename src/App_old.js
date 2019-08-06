@@ -6,7 +6,8 @@ import "./App.css";
 class App extends Component {
   state = {
     error: null,
-    isConnected: false
+    isLoaded: false,
+    results: []
   };
 
   componentDidMount() {
@@ -20,13 +21,14 @@ class App extends Component {
             window.location.href = results.url;
           } else {
             this.setState({
-              isConnected: true
+              isLoaded: true,
+              results: results
             });
           }
         },
         error => {
           this.setState({
-            isConnected: false,
+            isLoaded: true,
             error
           });
         }
@@ -34,16 +36,16 @@ class App extends Component {
   }
 
   render() {
-    const { error, isConnected } = this.state;
+    const { error, isLoaded, results } = this.state;
     if (error) {
       return <div>Error: {error.message}</div>;
-    } else if (!isConnected) {
-      return <div>Connecting...</div>;
+    } else if (!isLoaded) {
+      return <div>Loading...</div>;
     } else {
       return (
         <React.Fragment>
           <Header />
-          <SearchResults />
+          <SearchResults results={results} />
         </React.Fragment>
       );
     }

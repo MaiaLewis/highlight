@@ -12,7 +12,7 @@ SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly']
 def oauth2callback():
     flow = InstalledAppFlow.from_client_secrets_file(
         'credentials_local.json', SCOPES)
-    credentials = flow.run_local_server(port=0)
+    credentials = flow.run_local_server(port=5001)
     flask.session['credentials'] = {
         'token': credentials.token,
         'refresh_token': credentials.refresh_token,

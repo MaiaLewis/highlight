@@ -35,4 +35,5 @@ def search():
                 item["name"], item["owners"][0]["displayName"], item["modifiedTime"])
             session.run(node)
     session.close()
-    return flask.redirect(flask.url_for('search.search'))
+    success = {"documentCount": len(items)}
+    return success
