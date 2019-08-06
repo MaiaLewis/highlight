@@ -11,6 +11,8 @@ class App extends Component {
   };
 
   componentDidMount() {
+    //for local development use:
+    //fetch("http://localhost:5000/save/save")
     fetch("https://highlight-search.herokuapp.com/save/save")
       .then(res => res.json())
       .then(
