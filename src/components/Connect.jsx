@@ -1,9 +1,13 @@
 import React, { Component } from "react";
 
-class Header extends Component {
+class Connect extends Component {
   render() {
-    return <h1>Documents</h1>;
+    return (
+      <div className="button" onClick={this.props.onConnectToDrive}>
+        Connect to Drive
+      </div>
+    );
   }
 }
 
-export default Header;
+export default Connect;

@@ -31,3 +31,20 @@ def oauth2callback():
             'client_secret': credentials.client_secret,
             'scopes': credentials.scopes}
         return flask.redirect(flask.url_for('index'))
+
+
+@mod_auth.route('/account')
+def account():
+    status = []
+    if 'credentials' in flask.session:
+        status.append("credentials")
+    if 'docsSaved' in flask.session:
+        status.append("docsSaved")
+    response = json.dumps(status)
+    return response
+
+
+@mod_auth.route('/disconnect')
+def disconnect():
+    flask.session.pop('credentials')
+    return flask.redirect(flask.url_for('save.clear'))

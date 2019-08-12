@@ -12,6 +12,7 @@ SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly']
 def oauth2callback():
     flow = InstalledAppFlow.from_client_secrets_file(
         'credentials_local.json', SCOPES)
+    print("hi")
     credentials = flow.run_local_server(port=5001)
     flask.session['credentials'] = {
         'token': credentials.token,
@@ -20,4 +21,35 @@ def oauth2callback():
         'client_id': credentials.client_id,
         'client_secret': credentials.client_secret,
         'scopes': credentials.scopes}
+    print("Session")
+    print(flask.session)
     return flask.redirect(flask.url_for('index'))
+
+
+@mod_auth.route('/areCredentials')
+def areCredentials():
+    print("Session")
+    print(flask.session)
+    if 'credentials' in flask.session:
+        response = {"areCredentials": "true"}
+    else:
+        response = {"areCredentials": "false"}
+    response = json.dumps(response)
+    return response
+
+
+@mod_auth.route('/account')
+def account():
+    status = []
+    if 'credentials' in flask.session:
+        status.append("credentials")
+    if 'docsSaved' in flask.session:
+        status.append("docsSaved")
+    response = json.dumps(status)
+    return response
+
+
+@mod_auth.route('/disconnect')
+def disconnect():
+    flask.session.pop('credentials')
+    return flask.redirect(flask.url_for('save.clear'))

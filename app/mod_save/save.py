@@ -17,7 +17,8 @@ driver = GraphDatabase.driver(
 
 
 @mod_save.route('/save')
-def search():
+def save():
+    print("save ran")
     if 'credentials' not in flask.session:
         # redirect to authorize user
         return flask.redirect(flask.url_for('auth.oauth2callback'))
@@ -35,5 +36,17 @@ def search():
                 item["name"], item["owners"][0]["displayName"], item["modifiedTime"])
             session.run(node)
     session.close()
+    flask.session['docsSaved'] = True
     success = {"documentCount": len(items)}
+    success = json.dumps(success)
+    return success
+
+
+@mod_save.route('/clear')
+def clear():
+    session = driver.session()  # pylint: disable=assignment-from-no-return
+    session.run("MATCH (n) DETACH DELETE n")
+    session.close()
+    success = {"databaseCleared": "true"}
+    success = json.dumps(success)
     return success

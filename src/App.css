@@ -7,3 +7,8 @@
   padding: 5px;
   margin: 10px;
 }
+
+.button {
+  cursor: pointer;
+  color: blue;
+}
