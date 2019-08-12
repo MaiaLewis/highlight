@@ -40,6 +40,7 @@ def account():
         status.append("credentials")
     if 'docsSaved' in flask.session:
         status.append("docsSaved")
+    print(status)
     response = json.dumps(status)
     return response
 
