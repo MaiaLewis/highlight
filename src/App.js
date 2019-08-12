@@ -44,13 +44,19 @@ class App extends Component {
       .then(res => res.json())
       .then(
         results => {
-          if (results.includes("credentials")) {
+          if (results.includes("credentials") === false) {
             this.setState({
-              isConnected: true
+              isConnected: false,
+              areDocuments: false
             });
-          }
-          if (results.includes("docsSaved")) {
+          } else if (results.includes("docsSaved") === false) {
             this.setState({
+              isConnected: true,
+              areDocuments: false
+            });
+          } else {
+            this.setState({
+              isConnected: true,
               areDocuments: true
             });
           }
@@ -61,7 +67,6 @@ class App extends Component {
           });
         }
       );
-    console.log(this.state);
   }
 
   handleConnectToDrive = () => {
