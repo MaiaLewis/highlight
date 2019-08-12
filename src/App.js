@@ -108,9 +108,6 @@ class App extends Component {
       .then(
         results => {
           console.log(results);
-          this.setState({
-            areDocuments: true
-          });
         },
         error => {
           this.setState({
