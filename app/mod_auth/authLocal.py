@@ -52,4 +52,5 @@ def account():
 @mod_auth.route('/disconnect')
 def disconnect():
     flask.session.pop('credentials')
+    flask.session.pop('docsSaved')
     return flask.redirect(flask.url_for('save.clear'))
