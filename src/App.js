@@ -45,14 +45,9 @@ class App extends Component {
       .then(
         results => {
           if (!results.includes("credentials")) {
-            this.setState({
-              isConnected: false,
-              areDocuments: false
-            });
           } else if (!results.includes("docsSaved")) {
             this.setState({
-              isConnected: true,
-              areDocuments: false
+              isConnected: true
             });
           } else {
             this.setState({
@@ -114,6 +109,9 @@ class App extends Component {
       .then(res => res.json())
       .then(
         results => {
+          this.setState({
+            areDocuments: true
+          });
           console.log(results);
         },
         error => {
