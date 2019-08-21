@@ -9,6 +9,7 @@ export REACT_APP_SAVE_SAVE=http://localhost:5000/save/save
 export GRAPHENEDB_BOLT_URL=localhost
 export GRAPHENEDB_BOLT_USER=neo4j
 export GRAPHENEDB_BOLT_PASSWORD=password
+OAUTHLIB_RELAX_TOKEN_SCOPE
 
 
 
