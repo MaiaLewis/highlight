@@ -1,3 +1,17 @@
+## Local development environment variables
+
+export AUTH_ACCOUNT=http://localhost:5000/auth/account
+export AUTH_OAUTH2CALLBACK=http://localhost:5000/auth/oauth2callback
+export AUTH_DISCONNECT=http://localhost:5000/auth/disconnect
+export SEARCH_SEARCH=http://localhost:5000/search/search
+export SAVE_SAVE=http://localhost:5000/save/save
+
+export GRAPHENEDB_BOLT_URL=localhost
+export GRAPHENEDB_BOLT_USER=neo4j
+export GRAPHENEDB_BOLT_PASSWORD=password
+
+
+
 This project was bootstrapped with [Create React App](https://github.com/facebookincubator/create-react-app).
 
 Below you will find some information on how to perform common tasks.<br>

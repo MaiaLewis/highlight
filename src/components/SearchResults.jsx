@@ -9,7 +9,7 @@ class SearchResults extends Component {
   };
 
   componentDidMount() {
-    fetch("https://highlight-search.herokuapp.com/search/search")
+    fetch(process.env.SEARCH_SEARCH)
       .then(res => res.json())
       .then(
         results => {

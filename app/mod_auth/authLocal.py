@@ -5,7 +5,7 @@ from google.auth.transport.requests import Request
 import json
 
 mod_auth = flask.Blueprint('auth', __name__, url_prefix='/auth')
-SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly']
+SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
 
 
 @mod_auth.route('/oauth2callback')
@@ -24,18 +24,6 @@ def oauth2callback():
     print("Session")
     print(flask.session)
     return flask.redirect(flask.url_for('index'))
-
-
-@mod_auth.route('/areCredentials')
-def areCredentials():
-    print("Session")
-    print(flask.session)
-    if 'credentials' in flask.session:
-        response = {"areCredentials": "true"}
-    else:
-        response = {"areCredentials": "false"}
-    response = json.dumps(response)
-    return response
 
 
 @mod_auth.route('/account')

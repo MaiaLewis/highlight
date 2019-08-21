@@ -1,6 +1,7 @@
 import flask
 import os
 from neo4j.v1 import GraphDatabase, basic_auth
+from py2neo import Graph, Node, Relationship
 import json
 import string
 
@@ -10,14 +11,13 @@ graphenedb_url = os.environ.get("GRAPHENEDB_BOLT_URL")
 graphenedb_user = os.environ.get("GRAPHENEDB_BOLT_USER")
 graphenedb_pass = os.environ.get("GRAPHENEDB_BOLT_PASSWORD")
 
-driver = GraphDatabase.driver(
-    graphenedb_url, auth=basic_auth(graphenedb_user, graphenedb_pass))
+graph = Graph(graphenedb_url, user=graphenedb_user, password=graphenedb_pass,
+              bolt=True, secure=True, http_port=24789, https_port=24780)
 
 
 @mod_search.route('/search')
 def search():
-    session = driver.session()  # pylint: disable=assignment-from-no-return
-    items = session.run(
+    items = graph.run(
         "MATCH (n:Document) RETURN n.title AS title, n.author AS author, n.last_edit AS last_edit")
     documents = []
     for item in items:
@@ -28,6 +28,5 @@ def search():
             "last_edit": item["last_edit"]
         }
         documents.append(document)
-    session.close()
     documents = json.dumps(documents)
     return documents

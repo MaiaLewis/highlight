@@ -38,9 +38,7 @@ class App extends Component {
   }
 
   componentDidMount() {
-    //for local development use:
-    //fetch("http://localhost:5000/auth/account")
-    fetch("https://highlight-search.herokuapp.com/auth/account")
+    fetch(process.env.AUTH_ACCOUNT)
       .then(res => res.json())
       .then(
         results => {
@@ -66,9 +64,7 @@ class App extends Component {
   }
 
   handleConnectToDrive = () => {
-    //for local development use:
-    //fetch("http://localhost:5000/auth/oauth2callback")
-    fetch("https://highlight-search.herokuapp.com/auth/oauth2callback")
+    fetch(process.env.AUTH_OAUTH2CALLBACK)
       .then(res => res.json())
       .then(
         results => {
@@ -83,9 +79,7 @@ class App extends Component {
   };
 
   handleDisconnectDrive = () => {
-    //for local development use:
-    //fetch("http://localhost:5000/auth/disconnect")
-    fetch("https://highlight-search.herokuapp.com/auth/disconnect")
+    fetch(process.env.AUTH_DISCONNECT)
       .then(res => res.json())
       .then(
         results => {
@@ -103,9 +97,7 @@ class App extends Component {
   };
 
   saveDocuments = () => {
-    //for local development use:
-    //fetch("http://localhost:5000/save/save")
-    fetch("https://highlight-search.herokuapp.com/save/save")
+    fetch(process.env.SAVE_SAVE)
       .then(res => res.json())
       .then(
         results => {
