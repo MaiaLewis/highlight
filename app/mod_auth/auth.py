@@ -10,11 +10,11 @@ mod_auth = flask.Blueprint('auth', __name__, url_prefix='/auth')
 def oauth2callback():
     flow = Flow.from_client_secrets_file(
         'credentials.json',
-        scopes=['https://www.googleapis.com/auth/drive.metadata.readonly'],
+        scopes=['https://www.googleapis.com/auth/drive.readonly'],
         redirect_uri=flask.url_for('auth.oauth2callback', _external=True))
     if 'code' not in flask.request.args:
         authorization_url, state = flow.authorization_url(
-            access_type='offline', include_granted_scopes='true')
+            access_type='offline')
         flask.session['state'] = state
         url = {"url": authorization_url}
         url = json.dumps(url)
