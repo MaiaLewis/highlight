@@ -94,9 +94,12 @@ class Document:
                     entRel = Relationship(ideaNode, str(entity.index), entNode)
                     transaction.create(entNode)
                     transaction.create(entRel)
-        print("before commit")
-        transaction.commit()
-        print("commit complete")
+        try:
+            print("start commit")
+            transaction.commit()
+            print("commit complete")
+        except:
+            print("transaction timed out")
 
 
 class Content:

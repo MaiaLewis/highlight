@@ -37,10 +37,7 @@ def save():
                 fileId=item["id"], mimeType="text/html").execute()
             doc = Document(item["name"], item["owners"][0]
                            ["displayName"], item["modifiedTime"], html)
-            try:
-                doc.save()
-            except:
-                print("save took too long")
+            doc.save()
     flask.session['docsSaved'] = True
     success = {"documentCount": len(items)}
     success = json.dumps(success)
