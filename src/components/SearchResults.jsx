@@ -9,7 +9,7 @@ class SearchResults extends Component {
   };
 
   componentDidMount() {
-    fetch(process.env.REACT_SEARCH_SEARCH)
+    fetch(process.env.REACT_APP_SEARCH_SEARCH)
       .then(res => res.json())
       .then(
         results => {

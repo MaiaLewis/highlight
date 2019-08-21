@@ -38,8 +38,8 @@ class App extends Component {
   }
 
   componentDidMount() {
-    console.log(process.env.REACT_AUTH_ACCOUNT);
-    fetch(process.env.REACT_AUTH_ACCOUNT)
+    console.log(process.env.REACT_APP_AUTH_ACCOUNT);
+    fetch(process.env.REACT_APP_AUTH_ACCOUNT)
       .then(res => res.json())
       .then(
         results => {
@@ -65,7 +65,7 @@ class App extends Component {
   }
 
   handleConnectToDrive = () => {
-    fetch(process.env.REACT_AUTH_OAUTH2CALLBACK)
+    fetch(process.env.REACT_APP_AUTH_OAUTH2CALLBACK)
       .then(res => res.json())
       .then(
         results => {
@@ -80,7 +80,7 @@ class App extends Component {
   };
 
   handleDisconnectDrive = () => {
-    fetch(process.env.REACT_AUTH_DISCONNECT)
+    fetch(process.env.REACT_APP_AUTH_DISCONNECT)
       .then(res => res.json())
       .then(
         results => {
@@ -98,7 +98,7 @@ class App extends Component {
   };
 
   saveDocuments = () => {
-    fetch(process.env.REACT_SAVE_SAVE)
+    fetch(process.env.REACT_APP_SAVE_SAVE)
       .then(res => res.json())
       .then(
         results => {
