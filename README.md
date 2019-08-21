@@ -1,10 +1,10 @@
 ## Local development environment variables
 
-export AUTH_ACCOUNT=http://localhost:5000/auth/account
-export AUTH_OAUTH2CALLBACK=http://localhost:5000/auth/oauth2callback
-export AUTH_DISCONNECT=http://localhost:5000/auth/disconnect
-export SEARCH_SEARCH=http://localhost:5000/search/search
-export SAVE_SAVE=http://localhost:5000/save/save
+export REACT_APP_AUTH_ACCOUNT=http://localhost:5000/auth/account
+export REACT_APP_AUTH_OAUTH2CALLBACK=http://localhost:5000/auth/oauth2callback
+export REACT_APP_AUTH_DISCONNECT=http://localhost:5000/auth/disconnect
+export REACT_APP_SEARCH_SEARCH=http://localhost:5000/search/search
+export REACT_APP_SAVE_SAVE=http://localhost:5000/save/save
 
 export GRAPHENEDB_BOLT_URL=localhost
 export GRAPHENEDB_BOLT_USER=neo4j

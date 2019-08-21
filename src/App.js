@@ -38,7 +38,6 @@ class App extends Component {
   }
 
   componentDidMount() {
-    console.log(process.env.REACT_APP_AUTH_ACCOUNT);
     fetch(process.env.REACT_APP_AUTH_ACCOUNT)
       .then(res => res.json())
       .then(
