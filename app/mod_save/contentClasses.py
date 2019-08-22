@@ -24,7 +24,7 @@ class Document:
         self.extractContent()
 
     def extractContent(self):
-        soup = BeautifulSoup(self.html)
+        soup = BeautifulSoup(self.html, features="html.parser")
         doc = soup.body
         index = 0
         for tag in doc.children:
@@ -43,7 +43,7 @@ class Document:
                     index += 1
 
     def findTextSizes(self):
-        doc = BeautifulSoup(self.html)
+        doc = BeautifulSoup(self.html, features="html.parser")
         tags = doc.find_all(style=True)
         sizes = []
         for tag in tags:
@@ -94,12 +94,7 @@ class Document:
                     entRel = Relationship(ideaNode, str(entity.index), entNode)
                     transaction.create(entNode)
                     transaction.create(entRel)
-        try:
-            print("start commit")
-            transaction.commit()
-            print("commit complete")
-        except:
-            print("transaction timed out")
+        transaction.commit()
 
 
 class Content:
