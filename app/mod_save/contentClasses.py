@@ -1,5 +1,5 @@
 from neo4j.v1 import GraphDatabase, basic_auth
-from py2neo import Graph, Node, Relationship
+from py2neo import Graph, Node, Relationship, NodeMatcher
 import spacy
 from bs4 import BeautifulSoup
 import re
@@ -19,14 +19,19 @@ class Document:
         self.author = author
         self.lastModified = lastModified
         self.html = html
+        self.textSizes = []
+        self.text = []
+        self.levels = []
         self.contents = []
 
+        self.findTextSizes()
         self.extractContent()
+        self.processContent()
 
     def extractContent(self):
+        print(self.title)
         soup = BeautifulSoup(self.html, features="html.parser")
         doc = soup.body
-        index = 0
         for tag in doc.children:
             if tag.name.startswith("h") or tag.name == "p":
                 text = ""
@@ -37,10 +42,18 @@ class Document:
                     firstString = list(tag.strings)[0]
                     sizeParent = self.findSizeParent(firstString.parent)
                     textSize = self.findTextSize(sizeParent)
-                    level = self.findTextSizes().index(textSize)
-                    newContent = Content(index, level, text)
-                    self.contents.append(newContent)
-                    index += 1
+                    level = self.textSizes.index(textSize)
+                    self.text.append(text)
+                    self.levels.append(level)
+
+    def processContent(self):
+        index = 0
+        nlp = spacy.load("en_core_web_sm")
+        nlp.add_pipe(nlp.create_pipe('sentencizer'))
+        for text in nlp.pipe(self.text, disable=["parser"]):
+            newContent = Content(index, self.levels[index], text)
+            self.contents.append(newContent)
+            index += 1
 
     def findTextSizes(self):
         doc = BeautifulSoup(self.html, features="html.parser")
@@ -51,7 +64,7 @@ class Document:
             if size not in sizes and size != 0:
                 sizes.append(size)
         sizes.sort()
-        return sizes
+        self.textSizes = sizes
 
     def findSizeParent(self, tag):
         if "style" in tag.attrs and self.findTextSize(tag) != 0:
@@ -68,84 +81,94 @@ class Document:
         return 0
 
     def save(self):
-        print(self.title)
+        print("starting save")
         transaction = graph.begin()
+        matcher = NodeMatcher(graph)
         docNode = Node("Document", title=self.title,
                        author=self.author, lastModified=self.lastModified)
         transaction.create(docNode)
+        transaction.commit()
         for content in self.contents:
+            transaction = graph.begin()
             contNode = Node("Content", level=content.level)
             contRel = Relationship(docNode, str(content.index), contNode)
             transaction.create(contNode)
             transaction.create(contRel)
+            transaction.commit()
             for idea in content.ideas:
-                ideaNode = Node("Idea", text=idea.text)
+                transaction = graph.begin()
+                ideaText = idea.text.replace('"', '\\"')
+                ideaNode = matcher.match("Idea").where(
+                    '_.text = "{}"'.format(ideaText)).first()
+                if not ideaNode:
+                    ideaNode = Node("Idea", text=ideaText)
+                    transaction.create(ideaNode)
                 ideaRel = Relationship(contNode, str(idea.index), ideaNode)
-                transaction.create(ideaNode)
                 transaction.create(ideaRel)
+                transaction.commit()
                 for lemma in idea.lemmas:
-                    lemmaNode = Node("Lemma", name=lemma.name)
+                    transaction = graph.begin()
+                    lemmaNode = matcher.match("Lemma").where(
+                        '_.name = "{}"'.format(lemma.name)).first()
+                    print(lemmaNode)
+                    if not lemmaNode:
+                        lemmaNode = Node("Lemma", name=lemma.name)
+                        transaction.create(lemmaNode)
                     lemmaRel = Relationship(
                         ideaNode, str(lemma.index), lemmaNode)
-                    transaction.create(lemmaNode)
                     transaction.create(lemmaRel)
+                    transaction.commit()
                 for entity in idea.entities:
-                    entNode = Node("Entity", name=entity.name)
-                    entRel = Relationship(ideaNode, str(entity.index), entNode)
-                    transaction.create(entNode)
+                    transaction = graph.begin()
+                    entNode = matcher.match("Entity").where(
+                        '_.name = "{}"'.format(entity.name)).first()
+                    if not entNode:
+                        entNode = Node("Entity", name=entity.name)
+                        transaction.create(entNode)
+                    entRel = Relationship(
+                        ideaNode, str(entity.index), entNode)
                     transaction.create(entRel)
-        transaction.commit()
+                    transaction.commit()
+        print("save finished")
 
 
 class Content:
-    def __init__(self, index, level, text):
+    def __init__(self, index, level, nlpObject):
         self.index = index
-        self.text = text
+        self.nlpObject = nlpObject
         self.level = level
         self.ideas = []
 
         self.processContent()
 
     def processContent(self):
-        nlp = spacy.load("en_core_web_sm")
-        doc = nlp(self.text)
         index = 0
-        for sentence in doc.sents:
-            lemmas = []
-            entities = []
-            for token in sentence:
-                if token.pos_ in ["VERB", "NOUN"]:
-                    lemmas.append(token.lemma_)
-            for entity in sentence.ents:
-                entities.append(entity.text)
-            newIdea = Idea(index, sentence.text, lemmas, entities)
+        for sentence in self.nlpObject.sents:
+            newIdea = Idea(index, sentence)
             self.ideas.append(newIdea)
             index += 1
 
 
 class Idea:
-    def __init__(self,  index, text, lemmas, entities):
+    def __init__(self,  index, nlpObject):
         self.index = index
-        self.text = text
-        self.lemmaText = lemmas
-        self.entityText = entities
+        self.nlpObject = nlpObject
+        self.text = nlpObject.text
         self.lemmas = []
         self.entities = []
 
-        self.createLemmas()
-        self.createEntities()
+        self.processIdea()
 
-    def createLemmas(self):
+    def processIdea(self):
         index = 0
-        for lemma in self.lemmaText:
-            newLemma = Lemma(index, lemma)
-            self.lemmas.append(newLemma)
-            index += 1
-
-    def createEntities(self):
+        for token in self.nlpObject:
+            if token.pos_ in ["VERB", "NOUN"]:
+                newLemma = Lemma(index, token.lemma_)
+                self.lemmas.append(newLemma)
+                index += 1
         index = 0
-        for entity in self.entityText:
-            newEntity = Entity(index, entity)
+        for entity in self.nlpObject.ents:
+            newEntity = Entity(index, entity.text)
             self.entities.append(newEntity)
             index += 1
 
