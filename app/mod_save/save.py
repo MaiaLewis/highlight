@@ -1,15 +1,17 @@
 import flask
-import os
+from celery import Celery
 from googleapiclient.discovery import build
 from google.oauth2.credentials import Credentials
 from neo4j.v1 import GraphDatabase, basic_auth
 from py2neo import Graph, Node, Relationship
-import json
-import string
 from .contentClasses import Document
+import json
+import os
 
 
 mod_save = flask.Blueprint('save', __name__, url_prefix='/save')
+celery = Celery('save', backend=os.environ.get('CELERY_BROKER_URL'),
+                broker=os.environ.get('CELERY_BROKER_URL'))
 
 graphenedb_url = os.environ.get("GRAPHENEDB_BOLT_URL")
 graphenedb_user = os.environ.get("GRAPHENEDB_BOLT_USER")
@@ -21,32 +23,35 @@ graph = Graph(graphenedb_url, user=graphenedb_user, password=graphenedb_pass,
 
 @mod_save.route('/save')
 def save():
-    if 'credentials' not in flask.session:
-        # redirect to authorize user
+    credentials = flask.session['credentials']
+    saveDocs.delay(credentials)
+    flask.session['docsSaved'] = True
+    return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
+
+
+@mod_save.route('/clear')
+def clear():
+    graph.run("MATCH (n) DETACH DELETE n")
+    return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
+
+
+@celery.task()
+def saveDocs(sessionCredentials):
+    # do I actually need this if statement anymore?
+    if not sessionCredentials:
         return flask.redirect(flask.url_for('auth.oauth2callback'))
     else:
-        # connect to Drive API
-        credentials = Credentials(**flask.session['credentials'])
+        credentials = Credentials(**sessionCredentials)
         drive = build('drive', 'v3', credentials=credentials)
         results = drive.files().list(  # pylint: disable=no-member
             q="mimeType='application/vnd.google-apps.document'", pageSize=10, fields="nextPageToken, files(id, name, owners(displayName), modifiedTime)").execute()
-        # save documents to Graph
         items = results.get('files', [])
         for item in items:
             html = drive.files().export(  # pylint: disable=no-member
                 fileId=item["id"], mimeType="text/html").execute()
             doc = Document(item["name"], item["owners"][0]
                            ["displayName"], item["modifiedTime"], html)
-            doc.save()
-    flask.session['docsSaved'] = True
-    success = {"documentCount": len(items)}
-    success = json.dumps(success)
-    return success
-
-
-@mod_save.route('/clear')
-def clear():
-    graph.run("MATCH (n) DETACH DELETE n")
-    success = {"databaseCleared": "true"}
-    success = json.dumps(success)
-    return success
+            try:
+                doc.save()
+            except:
+                print("save failed")

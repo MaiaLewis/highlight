@@ -9,7 +9,14 @@ export REACT_APP_SAVE_SAVE=http://localhost:5000/save/save
 export GRAPHENEDB_BOLT_URL=localhost
 export GRAPHENEDB_BOLT_USER=neo4j
 export GRAPHENEDB_BOLT_PASSWORD=password
-OAUTHLIB_RELAX_TOKEN_SCOPE
+
+export CELERY_BROKER_URL=redis://localhost:6379
+
+## Production environment variables
+
+export GRAPHENEDB_BOLT_URL=bolt://hobby-acoegbklfpbjgbkepmmmgkdl.dbs.graphenedb.com:24787
+export GRAPHENEDB_BOLT_USER=app140191727-ltcNeh
+export GRAPHENEDB_BOLT_PASSWORD=b.cB7g3vfmNQ9c.uRdE0RrF4bJuBZwL
 
 
 
