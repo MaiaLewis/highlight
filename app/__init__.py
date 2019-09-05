@@ -1,7 +1,7 @@
 import flask
 # for local development use:
-from app.mod_auth.authLocal import mod_auth as auth_module
-# from app.mod_auth.auth import mod_auth as auth_module
+# from app.mod_auth.authLocal import mod_auth as auth_module
+from app.mod_auth.auth import mod_auth as auth_module
 from app.mod_save.save import mod_save as save_module
 from app.mod_search.search import mod_search as search_module
 from flask_cors import CORS
