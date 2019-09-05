@@ -11,7 +11,6 @@ chardet==3.0.4
 Click==7.0
 colorama==0.4.1
 cymem==2.0.2
-en-core-web-sm==2.1.0
 Flask==1.1.1
 Flask-Cors==3.0.8
 google-api-python-client==1.7.10
@@ -53,6 +52,7 @@ rsa==4.0
 six==1.12.0
 soupsieve==1.9.2
 spacy==2.1.8
+https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.1.0/en_core_web_sm-2.1.0.tar.gz#egg=en_core_web_sm
 srsly==0.1.0
 thinc==7.0.8
 tqdm==4.34.0
