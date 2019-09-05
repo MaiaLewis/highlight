@@ -17,15 +17,18 @@ graph = Graph(graphenedb_url, user=graphenedb_user, password=graphenedb_pass,
 
 @mod_search.route('/search')
 def search():
-    items = graph.run(
-        "MATCH (n:Document) RETURN n.title AS title, n.author AS author, n.last_edit AS last_edit")
+    try:
+        items = graph.run(
+            "MATCH (n:Document) RETURN n.title AS title, n.author AS author, n.lastModified AS lastModified")
+    except:
+        print("search failed")
     documents = []
     for item in items:
         document = {
             "title": item["title"],
             "topics": ["Topic 1", "Topic 2", "Topic 3"],
             "author": item["author"],
-            "last_edit": item["last_edit"]
+            "lastModified": item["lastModified"]
         }
         documents.append(document)
     documents = json.dumps(documents)

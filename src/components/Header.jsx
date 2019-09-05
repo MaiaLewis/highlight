@@ -1,11 +1,12 @@
 import React, { Component } from "react";
-import Disconnect from "./Disconnect";
 
 class Header extends Component {
   render() {
     return (
       <React.Fragment>
-        <Disconnect onDisconnectDrive={this.props.onDisconnectDrive} />
+        <div className="button" onClick={this.props.onDisconnectDrive}>
+          Disconnect Drive
+        </div>
         <h1>Documents</h1>
       </React.Fragment>
     );

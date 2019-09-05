@@ -7,7 +7,7 @@ class Result extends Component {
       <div className="Result">
         <p>{result.title}</p>
         <p>{result.author}</p>
-        <p>{result.last_edit}</p>
+        <p>{result.lastModified}</p>
         <ul>
           {result.topics.map(topic => (
             <li key={topic}>{topic}</li>

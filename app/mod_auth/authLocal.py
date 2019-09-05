@@ -12,7 +12,6 @@ SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
 def oauth2callback():
     flow = InstalledAppFlow.from_client_secrets_file(
         'credentials_local.json', SCOPES)
-    print("hi")
     credentials = flow.run_local_server(port=5001)
     flask.session['credentials'] = {
         'token': credentials.token,
@@ -21,24 +20,22 @@ def oauth2callback():
         'client_id': credentials.client_id,
         'client_secret': credentials.client_secret,
         'scopes': credentials.scopes}
-    print("Session")
-    print(flask.session)
+    flask.session['saveStatus'] = 'connected'
     return flask.redirect(flask.url_for('index'))
 
 
 @mod_auth.route('/account')
 def account():
-    status = []
-    if 'credentials' in flask.session:
-        status.append("credentials")
-    if 'docsSaved' in flask.session:
-        status.append("docsSaved")
-    response = json.dumps(status)
-    return response
+    accountStatus = {
+        'saveStatus': flask.session.get('saveStatus', 'not_connected'),
+        'progressURL': flask.session.get('progressURL', '')
+    }
+    print(accountStatus)
+    return json.dumps(accountStatus), 200, {'ContentType': 'application/json'}
 
 
 @mod_auth.route('/disconnect')
 def disconnect():
     flask.session.pop('credentials')
-    flask.session.pop('docsSaved')
+    flask.session['saveStatus'] = 'not_connected'
     return flask.redirect(flask.url_for('save.clear'))

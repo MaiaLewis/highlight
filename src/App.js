@@ -1,30 +1,34 @@
 import React, { Component } from "react";
 import Header from "./components/Header";
-import Connect from "./components/Connect";
 import SearchResults from "./components/SearchResults";
 import "./App.css";
 
 class App extends Component {
   state = {
     error: null,
-    isConnected: false,
-    areDocuments: false
+    saveStatus: "",
+    currentDocs: 0,
+    totalDocs: 0,
+    status: ""
   };
 
   render() {
-    const { error, isConnected, areDocuments } = this.state;
-    if (isConnected && !areDocuments) {
-      this.saveDocuments();
-    }
+    const { error, saveStatus, currentDocs, totalDocs } = this.state;
     if (error) {
       return <div>Error: {error.message}</div>;
-    } else if (!isConnected) {
-      return <Connect onConnectToDrive={this.handleConnectToDrive} />;
-    } else if (!areDocuments) {
+    } else if (saveStatus === "not_connected") {
+      return (
+        <div className="button" onClick={this.onConnectToDrive}>
+          Connect to Drive
+        </div>
+      );
+    } else if (saveStatus === "saving") {
       return (
         <React.Fragment>
           <Header onDisconnectDrive={this.handleDisconnectDrive} />
-          <p>Loading documents...</p>
+          <p>
+            Loading {currentDocs}/{totalDocs}
+          </p>
         </React.Fragment>
       );
     } else {
@@ -42,18 +46,20 @@ class App extends Component {
       .then(res => res.json())
       .then(
         results => {
-          if (!results.includes("credentials")) {
-          } else if (!results.includes("docsSaved")) {
+          console.log(this.state);
+          if (results.saveStatus === "not_connected") {
             this.setState({
-              isConnected: true
+              saveStatus: "not_connected"
             });
-          } else {
+          } else if (results.saveStatus === "connected") {
+            this.saveDocuments();
+          } else if (results.saveStatus === "saving") {
+            this.updateProgress(results.progressURL);
+          } else if (results.saveStatus === "up_to_date") {
             this.setState({
-              isConnected: true,
-              areDocuments: true
+              saveStatus: "up_to_date"
             });
           }
-          console.log(this.state);
         },
         error => {
           this.setState({
@@ -63,7 +69,7 @@ class App extends Component {
       );
   }
 
-  handleConnectToDrive = () => {
+  onConnectToDrive = () => {
     fetch(process.env.REACT_APP_AUTH_OAUTH2CALLBACK)
       .then(res => res.json())
       .then(
@@ -85,7 +91,7 @@ class App extends Component {
         results => {
           console.log(results);
           this.setState({
-            isConnected: false
+            saveStatus: "not_connected"
           });
         },
         error => {
@@ -102,9 +108,38 @@ class App extends Component {
       .then(
         results => {
           this.setState({
-            areDocuments: true
+            saveStatus: "saving"
           });
-          console.log(results);
+          this.updateProgress(results.progressURL);
+        },
+        error => {
+          this.setState({
+            error
+          });
+        }
+      );
+  };
+
+  updateProgress = progressURL => {
+    var self = this;
+    fetch(progressURL)
+      .then(res => res.json())
+      .then(
+        results => {
+          this.setState({
+            currentDocs: results.currentDocs,
+            totalDocs: results.totalDocs,
+            status: results.status
+          });
+          if (results.state === "SUCCESS") {
+            this.setState({
+              saveStatus: "up_to_date"
+            }); //need an FE error case if celery job returns error
+          } else {
+            setTimeout(function() {
+              self.updateProgress(progressURL);
+            }, 2000);
+          }
         },
         error => {
           this.setState({
