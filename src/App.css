@@ -12,3 +12,50 @@
   cursor: pointer;
   color: blue;
 }
+
+.Document {
+  background-color: #f4f4f4;
+  padding: 5px;
+  margin: 10px;
+  width: 60%;
+  float: left;
+}
+
+.Sidebar {
+  float: left;
+}
+
+.Idea:hover {
+  background-color: yellow;
+  cursor: pointer;
+}
+
+.Content0 {
+  font-size: 16px;
+  line-height: 140%;
+}
+
+.Content1 {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.Content2 {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.Content3 {
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.Content4 {
+  font-size: 32px;
+  font-weight: bold;
+}
+
+.Content5 {
+  font-size: 36px;
+  font-weight: bold;
+}

@@ -1,16 +1,17 @@
 ## Local development environment variables
 
-export REACT_APP_AUTH_ACCOUNT=http://localhost:5000/auth/account <br>
-export REACT_APP_AUTH_OAUTH2CALLBACK=http://localhost:5000/auth/oauth2callback <br>
-export REACT_APP_AUTH_DISCONNECT=http://localhost:5000/auth/disconnect <br>
-export REACT_APP_SEARCH_SEARCH=http://localhost:5000/search/search <br>
-export REACT_APP_SAVE_SAVE=http://localhost:5000/save/save <br>
+export REACT_APP_AUTH_ACCOUNT=http://localhost:5000/auth/account
+export REACT_APP_AUTH_OAUTH2CALLBACK=http://localhost:5000/auth/oauth2callback
+export REACT_APP_AUTH_DISCONNECT=http://localhost:5000/auth/disconnect
+export REACT_APP_SEARCH_SEARCH=http://localhost:5000/search/search
+export REACT_APP_SEARCH_DOCUMENT=http://localhost:5000/search/document
+export REACT_APP_SAVE_SAVE=http://localhost:5000/save/save
 
-export GRAPHENEDB_BOLT_URL=localhost <br>
-export GRAPHENEDB_BOLT_USER=neo4j <br>
-export GRAPHENEDB_BOLT_PASSWORD=password <br>
+export GRAPHENEDB_BOLT_URL=localhost 
+export GRAPHENEDB_BOLT_USER=neo4j
+export GRAPHENEDB_BOLT_PASSWORD=password 
 
-export REDIS_URL=redis://localhost:6379 <br>
+export REDIS_URL=redis://localhost:6379 
 
 This project was bootstrapped with [Create React App](https://github.com/facebookincubator/create-react-app).
 

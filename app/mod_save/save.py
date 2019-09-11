@@ -10,8 +10,8 @@ import os
 
 
 mod_save = flask.Blueprint('save', __name__, url_prefix='/save')
-celery = Celery('save', backend=os.environ.get('REDIS_URL'),
-                broker=os.environ.get('REDIS_URL'))
+celery = Celery('save', broker=os.environ.get('REDIS_URL'),
+                backend=os.environ.get('REDIS_URL'))
 
 graphenedb_url = os.environ.get("GRAPHENEDB_BOLT_URL")
 graphenedb_user = os.environ.get("GRAPHENEDB_BOLT_USER")
@@ -25,6 +25,7 @@ graph = Graph(graphenedb_url, user=graphenedb_user, password=graphenedb_pass,
 def save():
     task = saveDocs.delay(flask.session['credentials'])
     progressURL = flask.url_for('save.saveProgress', task_id=task.id)
+    print(progressURL)
     flask.session['saveStatus'] = 'saving'
     flask.session['progressURL'] = progressURL
     return json.dumps({'success': True, 'progressURL': progressURL}), 202, {'ContentType': 'application/json'}
@@ -47,7 +48,7 @@ def saveDocs(self, sessionCredentials):
         for item in items:
             html = drive.files().export(  # pylint: disable=no-member
                 fileId=item["id"], mimeType="text/html").execute()
-            doc = Document(item["name"], item["owners"][0]
+            doc = Document(item["id"], item["name"], item["owners"][0]
                            ["displayName"], item["modifiedTime"], html)
             try:
                 doc.save()
@@ -65,6 +66,7 @@ def saveDocs(self, sessionCredentials):
 
 @mod_save.route('/progress/<task_id>')
 def saveProgress(task_id):
+    print(task_id)
     task = saveDocs.AsyncResult(task_id)
     print(task.state)
     if task.state == 'PENDING':

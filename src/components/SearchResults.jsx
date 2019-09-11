@@ -8,6 +8,21 @@ class SearchResults extends Component {
     results: []
   };
 
+  render() {
+    const results = this.state.results;
+    return (
+      <div>
+        {results.map(result => (
+          <Result
+            key={result.docId}
+            result={result}
+            onViewDocument={this.props.onViewDocument}
+          />
+        ))}
+      </div>
+    );
+  }
+
   componentDidMount() {
     fetch(process.env.REACT_APP_SEARCH_SEARCH)
       .then(res => res.json())
@@ -25,17 +40,6 @@ class SearchResults extends Component {
           });
         }
       );
-  }
-
-  render() {
-    const results = this.state.results;
-    return (
-      <div>
-        {results.map(result => (
-          <Result key={result.title} result={result} />
-        ))}
-      </div>
-    );
   }
 }
 

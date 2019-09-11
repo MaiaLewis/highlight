@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import Header from "./components/Header";
 import SearchResults from "./components/SearchResults";
+import DocumentView from "./components/DocumentView";
 import "./App.css";
 
 class App extends Component {
@@ -9,11 +10,12 @@ class App extends Component {
     saveStatus: "",
     currentDocs: 0,
     totalDocs: 0,
-    status: ""
+    status: "",
+    document: null
   };
 
   render() {
-    const { error, saveStatus, currentDocs, totalDocs } = this.state;
+    const { error, saveStatus, currentDocs, totalDocs, document } = this.state;
     if (error) {
       return <div>Error: {error.message}</div>;
     } else if (saveStatus === "not_connected") {
@@ -31,11 +33,21 @@ class App extends Component {
           </p>
         </React.Fragment>
       );
+    } else if (document !== null) {
+      return (
+        <React.Fragment>
+          <Header onDisconnectDrive={this.handleDisconnectDrive} />
+          <DocumentView
+            docId={document}
+            onCloseDocument={this.handleCloseDocument}
+          />
+        </React.Fragment>
+      );
     } else {
       return (
         <React.Fragment>
           <Header onDisconnectDrive={this.handleDisconnectDrive} />
-          <SearchResults />
+          <SearchResults onViewDocument={this.handleViewDocument} />
         </React.Fragment>
       );
     }
@@ -82,6 +94,18 @@ class App extends Component {
           });
         }
       );
+  };
+
+  handleViewDocument = docId => {
+    this.setState({
+      document: docId
+    });
+  };
+
+  handleCloseDocument = () => {
+    this.setState({
+      document: null
+    });
   };
 
   handleDisconnectDrive = () => {
@@ -136,6 +160,9 @@ class App extends Component {
               saveStatus: "up_to_date"
             }); //need an FE error case if celery job returns error
           } else {
+            this.setState({
+              saveStatus: "saving"
+            });
             setTimeout(function() {
               self.updateProgress(progressURL);
             }, 2000);

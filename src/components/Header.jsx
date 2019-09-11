@@ -7,7 +7,7 @@ class Header extends Component {
         <div className="button" onClick={this.props.onDisconnectDrive}>
           Disconnect Drive
         </div>
-        <h1>Documents</h1>
+        <h1>Highlight</h1>
       </React.Fragment>
     );
   }

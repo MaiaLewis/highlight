@@ -14,7 +14,8 @@ graph = Graph(graphenedb_url, user=graphenedb_user, password=graphenedb_pass,
 
 
 class Document:
-    def __init__(self, title, author, lastModified, html):
+    def __init__(self, docId, title, author, lastModified, html):
+        self.docId = docId
         self.title = title
         self.author = author
         self.lastModified = lastModified
@@ -84,7 +85,7 @@ class Document:
         print("starting save")
         transaction = graph.begin()
         matcher = NodeMatcher(graph)
-        docNode = Node("Document", title=self.title,
+        docNode = Node("Document", docId=self.docId, title=self.title,
                        author=self.author, lastModified=self.lastModified)
         transaction.create(docNode)
         transaction.commit()
@@ -112,7 +113,8 @@ class Document:
                         '_.name = "{}"'.format(lemma.name)).first()
                     print(lemmaNode)
                     if not lemmaNode:
-                        lemmaNode = Node("Lemma", name=lemma.name)
+                        lemmaNode = Node(
+                            "Lemma", name=lemma.name, pos=lemma.pos)
                         transaction.create(lemmaNode)
                     lemmaRel = Relationship(
                         ideaNode, str(lemma.index), lemmaNode)
@@ -123,7 +125,8 @@ class Document:
                     entNode = matcher.match("Entity").where(
                         '_.name = "{}"'.format(entity.name)).first()
                     if not entNode:
-                        entNode = Node("Entity", name=entity.name)
+                        entNode = Node("Entity", name=entity.name,
+                                       entType=entity.entType)
                         transaction.create(entNode)
                     entRel = Relationship(
                         ideaNode, str(entity.index), entNode)
@@ -162,24 +165,27 @@ class Idea:
     def processIdea(self):
         index = 0
         for token in self.nlpObject:
-            if token.pos_ in ["VERB", "NOUN"]:
-                newLemma = Lemma(index, token.lemma_)
+            if token.pos_ in ["VERB", "NOUN"] and token.lemma_ not in ["be", "have", "can", "do"]:
+                newLemma = Lemma(index, token.lemma_, token.pos_)
                 self.lemmas.append(newLemma)
                 index += 1
         index = 0
         for entity in self.nlpObject.ents:
-            newEntity = Entity(index, entity.text)
-            self.entities.append(newEntity)
-            index += 1
+            if entity.label_ not in ["DATE", "TIME", "PERCENT", "MONEY", "QUANTITY", "ORDINAL", "CARDINAL"]:
+                newEntity = Entity(index, entity.text, entity.label_)
+                self.entities.append(newEntity)
+                index += 1
 
 
 class Lemma:
-    def __init__(self, index, name):
+    def __init__(self, index, name, pos):
         self.index = index
         self.name = name
+        self.pos = pos
 
 
 class Entity:
-    def __init__(self, index, name):
+    def __init__(self, index, name, entType):
         self.index = index
         self.name = name
+        self.entType = entType

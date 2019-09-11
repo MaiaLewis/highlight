@@ -5,7 +5,12 @@ class Result extends Component {
     const result = this.props.result;
     return (
       <div className="Result">
-        <p>{result.title}</p>
+        <div
+          className="button"
+          onClick={() => this.props.onViewDocument(result.docId)}
+        >
+          {result.title}
+        </div>
         <p>{result.author}</p>
         <p>{result.lastModified}</p>
         <ul>
