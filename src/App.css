@@ -23,6 +23,7 @@
 
 .Sidebar {
   float: left;
+  width: 30%;
 }
 
 .Idea:hover {

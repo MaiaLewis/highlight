@@ -35,7 +35,6 @@ class Document extends Component {
           this.setState({
             document: results
           });
-          console.log(this.state);
         },
         error => {
           this.setState({

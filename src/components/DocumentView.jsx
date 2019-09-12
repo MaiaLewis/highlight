@@ -4,13 +4,12 @@ import Sidebar from "./Sidebar";
 
 class DocumentView extends Component {
   state = {
+    error: null,
     docId: null,
-    entities: [],
-    lemmas: []
+    relatedIdeas: []
   };
 
   render() {
-    console.log(this.state);
     return (
       <React.Fragment>
         <div className="button" onClick={this.props.onCloseDocument}>
@@ -20,16 +19,26 @@ class DocumentView extends Component {
           docId={this.props.docId}
           onSelectIdea={this.handleSelectIdea}
         />
-        <Sidebar entities={this.state.entities} lemmas={this.state.lemmas} />
+        <Sidebar relatedIdeas={this.state.relatedIdeas} />
       </React.Fragment>
     );
   }
 
-  handleSelectIdea = (entities, lemmas) => {
-    this.setState({
-      entities: entities,
-      lemmas: lemmas
-    });
+  handleSelectIdea = ideaId => {
+    fetch("http://localhost:5000/search/info".concat("/" + ideaId))
+      .then(res => res.json())
+      .then(
+        results => {
+          this.setState({
+            relatedIdeas: results
+          });
+        },
+        error => {
+          this.setState({
+            error
+          });
+        }
+      );
   };
 }
 

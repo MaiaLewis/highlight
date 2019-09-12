@@ -4,7 +4,7 @@ from googleapiclient.discovery import build
 from google.oauth2.credentials import Credentials
 from neo4j.v1 import GraphDatabase, basic_auth
 from py2neo import Graph, Node, Relationship
-from .contentClasses import Document
+from .createClasses import CreateDocument
 import json
 import os
 
@@ -39,7 +39,6 @@ def saveDocs(self, sessionCredentials):
     else:
         credentials = Credentials(**sessionCredentials)
         drive = build('drive', 'v3', credentials=credentials)
-        print("this is working")
         results = drive.files().list(  # pylint: disable=no-member
             q="mimeType='application/vnd.google-apps.document'", pageSize=100, fields="nextPageToken, files(id, name, owners(displayName), modifiedTime)").execute()
         items = results.get('files', [])
@@ -48,8 +47,8 @@ def saveDocs(self, sessionCredentials):
         for item in items:
             html = drive.files().export(  # pylint: disable=no-member
                 fileId=item["id"], mimeType="text/html").execute()
-            doc = Document(item["id"], item["name"], item["owners"][0]
-                           ["displayName"], item["modifiedTime"], html)
+            doc = CreateDocument(item["id"], item["name"], item["owners"][0]
+                                 ["displayName"], item["modifiedTime"], html)
             try:
                 doc.save()
                 progressData = {
@@ -64,10 +63,10 @@ def saveDocs(self, sessionCredentials):
     return {'current': docIndex, 'total': totalDocs}
 
 
-@mod_save.route('/progress/<task_id>')
-def saveProgress(task_id):
-    print(task_id)
-    task = saveDocs.AsyncResult(task_id)
+@mod_save.route('/progress/<taskId>')
+def saveProgress(taskId):
+    print(taskId)
+    task = saveDocs.AsyncResult(taskId)
     print(task.state)
     if task.state == 'PENDING':
         response = {

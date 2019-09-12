@@ -6,10 +6,8 @@ class Idea extends Component {
     return (
       <span
         className="Idea"
-        entities={idea.entities}
-        lemmas={idea.lemmas}
         id={idea.id}
-        onClick={() => this.props.onSelectIdea(idea.entities, idea.lemmas)}
+        onClick={() => this.props.onSelectIdea(idea.id)}
       >
         {idea.text + " "}
       </span>

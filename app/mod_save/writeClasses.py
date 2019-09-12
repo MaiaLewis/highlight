@@ -13,7 +13,7 @@ graph = Graph(graphenedb_url, user=graphenedb_user, password=graphenedb_pass,
               bolt=True, secure=True, http_port=24789, https_port=24780)
 
 
-class Document:
+class CreateDocument:
     def __init__(self, docId, title, author, lastModified, html):
         self.docId = docId
         self.title = title
@@ -52,7 +52,7 @@ class Document:
         nlp = spacy.load("en_core_web_sm")
         nlp.add_pipe(nlp.create_pipe('sentencizer'))
         for text in nlp.pipe(self.text, disable=["parser"]):
-            newContent = Content(index, self.levels[index], text)
+            newContent = CreateContent(index, self.levels[index], text)
             self.contents.append(newContent)
             index += 1
 
@@ -135,7 +135,7 @@ class Document:
         print("save finished")
 
 
-class Content:
+class CreateContent:
     def __init__(self, index, level, nlpObject):
         self.index = index
         self.nlpObject = nlpObject
@@ -147,12 +147,12 @@ class Content:
     def processContent(self):
         index = 0
         for sentence in self.nlpObject.sents:
-            newIdea = Idea(index, sentence)
+            newIdea = CreateIdea(index, sentence)
             self.ideas.append(newIdea)
             index += 1
 
 
-class Idea:
+class CreateIdea:
     def __init__(self,  index, nlpObject):
         self.index = index
         self.nlpObject = nlpObject
@@ -166,25 +166,25 @@ class Idea:
         index = 0
         for token in self.nlpObject:
             if token.pos_ in ["VERB", "NOUN"] and token.lemma_ not in ["be", "have", "can", "do"]:
-                newLemma = Lemma(index, token.lemma_, token.pos_)
+                newLemma = CreateLemma(index, token.lemma_, token.pos_)
                 self.lemmas.append(newLemma)
                 index += 1
         index = 0
         for entity in self.nlpObject.ents:
             if entity.label_ not in ["DATE", "TIME", "PERCENT", "MONEY", "QUANTITY", "ORDINAL", "CARDINAL"]:
-                newEntity = Entity(index, entity.text, entity.label_)
+                newEntity = CreateEntity(index, entity.text, entity.label_)
                 self.entities.append(newEntity)
                 index += 1
 
 
-class Lemma:
+class CreateLemma:
     def __init__(self, index, name, pos):
         self.index = index
         self.name = name
         self.pos = pos
 
 
-class Entity:
+class CreateEntity:
     def __init__(self, index, name, entType):
         self.index = index
         self.name = name
