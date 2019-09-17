@@ -109,8 +109,8 @@ class CreateDocument:
                 transaction.commit()
                 for lemma in idea.lemmas:
                     transaction = graph.begin()
-                    lemmaNode = matcher.match("Lemma").where(
-                        '_.name = "{}"'.format(lemma.name)).first()
+                    lemmaNode = matcher.match(
+                        "Lemma", name=lemma.name, pos=lemma.pos).first()
                     print(lemmaNode)
                     if not lemmaNode:
                         lemmaNode = Node(
@@ -132,7 +132,33 @@ class CreateDocument:
                         ideaNode, str(entity.index), entNode)
                     transaction.create(entRel)
                     transaction.commit()
+        print("Begin Find Topics")
+        topics = self.findTopics()
+        print("Begin Save Topics")
+        for topic in topics:
+            transaction = graph.begin()
+            topicNode = matcher.match().where(
+                "ID(_) = {}".format(topic)).first()
+            print(topicNode)
+            topicRel = Relationship(docNode, "topic", topicNode)
+            transaction.create(topicRel)
+            transaction.commit()
         print("save finished")
+
+    def findTopics(self):
+        topics = []
+        entTopics = graph.run(
+            "MATCH (n:Document {{docId:'{}'}})-->(c:Content)-->(i:Idea)-->(e:Entity) RETURN ID(e) as id,  SIZE(COLLECT(i)) as cnt ORDER BY cnt DESC LIMIT 10".format(self.docId)).data()
+        for e in entTopics:
+            if e["cnt"] > 1:
+                topics.append({"id": e["id"], "degree": e["cnt"]})
+        lemTopics = graph.run(
+            "MATCH (n:Document {{docId:'{}'}})-->(c:Content)-->(i:Idea)-->(l:Lemma {{pos:'NOUN'}}) WHERE NOT l.name IN ['thing', 'something', 'someone', 'way', 'lot', 'minute', 'hour', 'day', 'week', 'year', 'today', 'tomorrow', 'time', 'reason', 'point', 'detail'] RETURN ID(l) as id,  SIZE(COLLECT(i)) as cnt ORDER BY cnt DESC LIMIT 10".format(self.docId)).data()
+        for l in lemTopics:
+            if l["cnt"] > 2:
+                topics.append({"id": l["id"], "degree": l["cnt"]})
+        print(topics)
+        return topics
 
 
 class CreateContent:

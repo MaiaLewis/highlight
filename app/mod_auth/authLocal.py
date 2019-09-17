@@ -27,8 +27,9 @@ def oauth2callback():
 @mod_auth.route('/account')
 def account():
     accountStatus = {
-        # 'saveStatus': flask.session.get('saveStatus', 'not_connected'),
-        'saveStatus': 'up_to_date',
+        'saveStatus': flask.session.get('saveStatus', 'not_connected'),
+        # for front-end development use:
+        # 'saveStatus': 'up_to_date',
         'progressURL': flask.session.get('progressURL', '')
     }
     print(accountStatus)

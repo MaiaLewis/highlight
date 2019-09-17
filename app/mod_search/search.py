@@ -20,12 +20,12 @@ graph = Graph(graphenedb_url, user=graphenedb_user, password=graphenedb_pass,
 @mod_search.route('/search')
 def search():
     items = graph.run(
-        "MATCH (n:Document) RETURN n.title AS title, n.author AS author, n.lastModified AS lastModified, n.docId AS docId")
+        "MATCH (d:Document)-[:topic]->(n) RETURN d.title AS title, d.author AS author, d.lastModified AS lastModified, d.docId AS docId, COLLECT(n.name) AS topics")
     documents = []
     for item in items:
         document = {
             "title": item["title"],
-            "topics": ["Topic 1", "Topic 2", "Topic 3"],
+            "topics": item["topics"][-5:],
             "author": item["author"],
             "lastModified": item["lastModified"],
             "docId": item["docId"],

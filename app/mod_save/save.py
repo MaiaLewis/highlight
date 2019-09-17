@@ -4,7 +4,7 @@ from googleapiclient.discovery import build
 from google.oauth2.credentials import Credentials
 from neo4j.v1 import GraphDatabase, basic_auth
 from py2neo import Graph, Node, Relationship
-from .createClasses import CreateDocument
+from .writeClasses import CreateDocument
 import json
 import os
 
@@ -24,7 +24,7 @@ graph = Graph(graphenedb_url, user=graphenedb_user, password=graphenedb_pass,
 @mod_save.route('/save')
 def save():
     task = saveDocs.delay(flask.session['credentials'])
-    progressURL = flask.url_for('save.saveProgress', task_id=task.id)
+    progressURL = flask.url_for('save.saveProgress', taskId=task.id)
     print(progressURL)
     flask.session['saveStatus'] = 'saving'
     flask.session['progressURL'] = progressURL
@@ -40,7 +40,7 @@ def saveDocs(self, sessionCredentials):
         credentials = Credentials(**sessionCredentials)
         drive = build('drive', 'v3', credentials=credentials)
         results = drive.files().list(  # pylint: disable=no-member
-            q="mimeType='application/vnd.google-apps.document'", pageSize=100, fields="nextPageToken, files(id, name, owners(displayName), modifiedTime)").execute()
+            q="mimeType='application/vnd.google-apps.document'", pageSize=3, fields="nextPageToken, files(id, name, owners(displayName), modifiedTime)").execute()
         items = results.get('files', [])
         totalDocs = len(items)
         docIndex = 0
