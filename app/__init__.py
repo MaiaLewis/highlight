@@ -1,9 +1,9 @@
 import flask
 # for local development use:
-from app.mod_auth.authLocal import mod_auth as auth_module
-# from app.mod_auth.auth import mod_auth as auth_module
-from app.mod_save.save import mod_save as save_module
-from app.mod_search.search import mod_search as search_module
+from app.mod_auth.authLocalRoutes import mod_auth as auth_module
+# from app.mod_auth.authRoutes import mod_auth as auth_module
+from app.mod_write.writeRoutes import mod_write as write_module
+from app.mod_read.readRoutes import mod_read as read_module
 from flask_cors import CORS
 
 app = flask.Flask(__name__, static_folder="../build/static",
@@ -14,8 +14,8 @@ app = flask.Flask(__name__, static_folder="../build/static",
 CORS(app)
 app.secret_key = "secret"
 app.register_blueprint(auth_module)
-app.register_blueprint(save_module)
-app.register_blueprint(search_module)
+app.register_blueprint(write_module)
+app.register_blueprint(read_module)
 
 
 @app.route('/')

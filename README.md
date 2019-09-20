@@ -3,15 +3,24 @@
 export REACT_APP_AUTH_ACCOUNT=http://localhost:5000/auth/account
 export REACT_APP_AUTH_OAUTH2CALLBACK=http://localhost:5000/auth/oauth2callback
 export REACT_APP_AUTH_DISCONNECT=http://localhost:5000/auth/disconnect
-export REACT_APP_SEARCH_SEARCH=http://localhost:5000/search/search
-export REACT_APP_SEARCH_DOCUMENT=http://localhost:5000/search/document
-export REACT_APP_SAVE_SAVE=http://localhost:5000/save/save
+export REACT_APP_READ_GRAPH=http://localhost:5000/read/graph
+export REACT_APP_READ_DOCUMENT=http://localhost:5000/read/document
+export REACT_APP_READ_RELATEDIDEAS=http://localhost:5000/read/related-ideas
+export REACT_APP_WRITE_GRAPH=http://localhost:5000/write/graph
 
-export GRAPHENEDB_BOLT_URL=localhost 
+export GRAPHENEDB_BOLT_URL=bolt://localhost:7687 
 export GRAPHENEDB_BOLT_USER=neo4j
 export GRAPHENEDB_BOLT_PASSWORD=password 
 
 export REDIS_URL=redis://localhost:6379 
+
+## Running locally
+
+redis-server /usr/local/etc/redis.conf
+
+celery worker -A app.mod_save.save.celery --loglevel=info
+
+## Boilerplate
 
 This project was bootstrapped with [Create React App](https://github.com/facebookincubator/create-react-app).
 

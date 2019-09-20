@@ -25,7 +25,7 @@ class DocumentView extends Component {
   }
 
   handleSelectIdea = ideaId => {
-    fetch("http://localhost:5000/search/info".concat("/" + ideaId))
+    fetch(process.env.REACT_APP_READ_RELATEDIDEAS.concat("/" + ideaId))
       .then(res => res.json())
       .then(
         results => {

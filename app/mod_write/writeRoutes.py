@@ -3,28 +3,29 @@ from celery import Celery
 from googleapiclient.discovery import build
 from google.oauth2.credentials import Credentials
 from neo4j.v1 import GraphDatabase, basic_auth
-from py2neo import Graph, Node, Relationship
 from .writeClasses import CreateDocument
 import json
 import os
 
 
-mod_save = flask.Blueprint('save', __name__, url_prefix='/save')
-celery = Celery('save', broker=os.environ.get('REDIS_URL'),
+mod_write = flask.Blueprint('write', __name__, url_prefix='/write')
+celery = Celery('write', broker=os.environ.get('REDIS_URL'),
                 backend=os.environ.get('REDIS_URL'))
 
 graphenedb_url = os.environ.get("GRAPHENEDB_BOLT_URL")
 graphenedb_user = os.environ.get("GRAPHENEDB_BOLT_USER")
 graphenedb_pass = os.environ.get("GRAPHENEDB_BOLT_PASSWORD")
 
-graph = Graph(graphenedb_url, user=graphenedb_user, password=graphenedb_pass,
-              bolt=True, secure=True, http_port=24789, https_port=24780)
+driver = GraphDatabase.driver(
+    graphenedb_url, auth=basic_auth(graphenedb_user, graphenedb_pass))
+
+# TODO Rewrite these routes to move DB interactions to writeClasses.py
 
 
-@mod_save.route('/save')
-def save():
-    task = saveDocs.delay(flask.session['credentials'])
-    progressURL = flask.url_for('save.saveProgress', taskId=task.id)
+@mod_write.route('/graph')
+def writeGraph():
+    task = writeDocuments.delay(flask.session['credentials'])
+    progressURL = flask.url_for('write.checkProgress', taskId=task.id)
     print(progressURL)
     flask.session['saveStatus'] = 'saving'
     flask.session['progressURL'] = progressURL
@@ -32,8 +33,8 @@ def save():
 
 
 @celery.task(bind=True)
-def saveDocs(self, sessionCredentials):
-    # do I actually need this if statement anymore?
+def writeDocuments(self, sessionCredentials):
+    # TODO do I actually need this if statement anymore?
     if not sessionCredentials:
         return flask.redirect(flask.url_for('auth.oauth2callback'))
     else:
@@ -63,10 +64,10 @@ def saveDocs(self, sessionCredentials):
     return {'current': docIndex, 'total': totalDocs}
 
 
-@mod_save.route('/progress/<taskId>')
-def saveProgress(taskId):
+@mod_write.route('/progress/<taskId>')
+def checkProgress(taskId):
     print(taskId)
-    task = saveDocs.AsyncResult(taskId)
+    task = writeDocuments.AsyncResult(taskId)
     print(task.state)
     if task.state == 'PENDING':
         response = {
@@ -100,7 +101,9 @@ def saveProgress(taskId):
     return json.dumps(response)
 
 
-@mod_save.route('/clear')
+@mod_write.route('/clear')
 def clear():
+    graph = driver.session()  # pylint: disable=assignment-from-no-return
     graph.run("MATCH (n) DETACH DELETE n")
+    graph.close()
     return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}

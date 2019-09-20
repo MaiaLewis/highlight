@@ -127,7 +127,7 @@ class App extends Component {
   };
 
   saveDocuments = () => {
-    fetch(process.env.REACT_APP_SAVE_SAVE)
+    fetch(process.env.REACT_APP_WRITE_GRAPH)
       .then(res => res.json())
       .then(
         results => {

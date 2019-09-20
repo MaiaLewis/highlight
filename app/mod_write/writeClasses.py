@@ -1,5 +1,4 @@
 from neo4j.v1 import GraphDatabase, basic_auth
-from py2neo import Graph, Node, Relationship, NodeMatcher
 import spacy
 from bs4 import BeautifulSoup
 import re
@@ -9,8 +8,8 @@ graphenedb_url = os.environ.get("GRAPHENEDB_BOLT_URL")
 graphenedb_user = os.environ.get("GRAPHENEDB_BOLT_USER")
 graphenedb_pass = os.environ.get("GRAPHENEDB_BOLT_PASSWORD")
 
-graph = Graph(graphenedb_url, user=graphenedb_user, password=graphenedb_pass,
-              bolt=True, secure=True, http_port=24789, https_port=24780)
+driver = GraphDatabase.driver(
+    graphenedb_url, auth=basic_auth(graphenedb_user, graphenedb_pass))
 
 
 class CreateDocument:
@@ -83,81 +82,88 @@ class CreateDocument:
 
     def save(self):
         print("starting save")
-        transaction = graph.begin()
-        matcher = NodeMatcher(graph)
-        docNode = Node("Document", docId=self.docId, title=self.title,
-                       author=self.author, lastModified=self.lastModified)
-        transaction.create(docNode)
-        transaction.commit()
+        graph = driver.session()  # pylint: disable=assignment-from-no-return
+        graph.run(
+            "CREATE (d:Document {{docId:'{}', title:'{}', author:'{}', lastModified:'{}'}})".format(self.docId, self.title, self.author, self.lastModified))
+        graph.close()
         for content in self.contents:
-            transaction = graph.begin()
-            contNode = Node("Content", level=content.level)
-            contRel = Relationship(docNode, str(content.index), contNode)
-            transaction.create(contNode)
-            transaction.create(contRel)
-            transaction.commit()
+            graph = driver.session()  # pylint: disable=assignment-from-no-return
+            contentId = graph.run(
+                "MATCH (d:Document {{docId:'{}'}}) CREATE (c:Content {{level:'{}'}}) CREATE (d)-[:`{}`]->(c) RETURN ID(c) as id".format(self.docId, content.level, str(content.index))).data()[0]["id"]
+            graph.close()
             for idea in content.ideas:
-                transaction = graph.begin()
-                ideaText = idea.text.replace('"', '\\"')
-                ideaNode = matcher.match("Idea").where(
-                    '_.text = "{}"'.format(ideaText)).first()
-                if not ideaNode:
-                    ideaNode = Node("Idea", text=ideaText)
-                    transaction.create(ideaNode)
-                ideaRel = Relationship(contNode, str(idea.index), ideaNode)
-                transaction.create(ideaRel)
-                transaction.commit()
+                ideaText = idea.text.replace("'", '\\"')
+                graph = driver.session()  # pylint: disable=assignment-from-no-return
+                existingIdea = graph.run(
+                    "MATCH (i:Idea {{text: '{}'}}) RETURN ID(i) AS id".format(ideaText)).data()
+                graph.close()
+                if existingIdea:
+                    ideaId = existingIdea[0]["id"]
+                else:
+                    graph = driver.session()  # pylint: disable=assignment-from-no-return
+                    ideaId = graph.run(
+                        "CREATE (i:Idea {{text: '{}'}}) RETURN ID(i) AS id".format(ideaText)).data()[0]["id"]
+                    graph.close()
+                graph = driver.session()  # pylint: disable=assignment-from-no-return
+                graph.run("MATCH (c:Content) WHERE ID(c)={} MATCH (i:Idea) WHERE ID(i)={} CREATE (c)-[:`{}`]->(i)".format(
+                    contentId, ideaId, str(idea.index)))
+                graph.close()
                 for lemma in idea.lemmas:
-                    transaction = graph.begin()
-                    lemmaNode = matcher.match(
-                        "Lemma", name=lemma.name, pos=lemma.pos).first()
-                    print(lemmaNode)
-                    if not lemmaNode:
-                        lemmaNode = Node(
-                            "Lemma", name=lemma.name, pos=lemma.pos)
-                        transaction.create(lemmaNode)
-                    lemmaRel = Relationship(
-                        ideaNode, str(lemma.index), lemmaNode)
-                    transaction.create(lemmaRel)
-                    transaction.commit()
+                    graph = driver.session()  # pylint: disable=assignment-from-no-return
+                    existingLemma = graph.run(
+                        "MATCH (l:Lemma {{name: '{}', pos: '{}'}}) RETURN ID(l) AS id".format(lemma.name, lemma.pos)).data()
+                    graph.close()
+                    if existingLemma:
+                        lemmaId = existingLemma[0]["id"]
+                    else:
+                        graph = driver.session()  # pylint: disable=assignment-from-no-return
+                        lemmaId = graph.run(
+                            "CREATE (l:Lemma {{name: '{}', pos: '{}'}}) RETURN ID(l) AS id".format(lemma.name, lemma.pos)).data()[0]["id"]
+                        graph.close()
+                    graph = driver.session()  # pylint: disable=assignment-from-no-return
+                    graph.run("MATCH (i:Idea) WHERE ID(i)={} MATCH (l:Lemma) WHERE ID(l)={} CREATE (i)-[:`{}`]->(l)".format(
+                        ideaId, lemmaId, str(lemma.index)))
+                    graph.close()
                 for entity in idea.entities:
-                    transaction = graph.begin()
-                    entNode = matcher.match("Entity").where(
-                        '_.name = "{}"'.format(entity.name)).first()
-                    if not entNode:
-                        entNode = Node("Entity", name=entity.name,
-                                       entType=entity.entType)
-                        transaction.create(entNode)
-                    entRel = Relationship(
-                        ideaNode, str(entity.index), entNode)
-                    transaction.create(entRel)
-                    transaction.commit()
-        print("Begin Find Topics")
+                    graph = driver.session()  # pylint: disable=assignment-from-no-return
+                    existingEntity = graph.run(
+                        "MATCH (e:Entity {{name: '{}'}}) RETURN ID(e) AS id".format(entity.name)).data()
+                    graph.close()
+                    if existingEntity:
+                        entityId = existingEntity[0]["id"]
+                    else:
+                        graph = driver.session()  # pylint: disable=assignment-from-no-return
+                        entityId = graph.run(
+                            "CREATE (e:Entity {{name: '{}', entType: '{}'}}) RETURN ID(e) AS id".format(entity.name, entity.entType)).data()[0]["id"]
+                        graph.close()
+                    graph = driver.session()  # pylint: disable=assignment-from-no-return
+                    graph.run("MATCH (i:Idea) WHERE ID(i)={} MATCH (e:Entity) WHERE ID(e)={} CREATE (i)-[:`{}`]->(e)".format(
+                        ideaId, entityId, str(entity.index)))
+                    graph.close()
         topics = self.findTopics()
-        print("Begin Save Topics")
         for topic in topics:
-            transaction = graph.begin()
-            topicNode = matcher.match().where(
-                "ID(_) = {}".format(topic)).first()
-            print(topicNode)
-            topicRel = Relationship(docNode, "topic", topicNode)
-            transaction.create(topicRel)
-            transaction.commit()
+            graph = driver.session()  # pylint: disable=assignment-from-no-return
+            graph.run(
+                "MATCH (d:Document {{docId:'{}'}}) MATCH (n) WHERE ID(n)={} CREATE (d)-[:Topic {{degree: '{}'}}]->(n)".format(self.docId, topic["id"], topic["degree"]))
+            graph.close()
         print("save finished")
 
     def findTopics(self):
         topics = []
+        graph = driver.session()  # pylint: disable=assignment-from-no-return
         entTopics = graph.run(
             "MATCH (n:Document {{docId:'{}'}})-->(c:Content)-->(i:Idea)-->(e:Entity) RETURN ID(e) as id,  SIZE(COLLECT(i)) as cnt ORDER BY cnt DESC LIMIT 10".format(self.docId)).data()
+        graph.close()
         for e in entTopics:
             if e["cnt"] > 1:
                 topics.append({"id": e["id"], "degree": e["cnt"]})
+        graph = driver.session()  # pylint: disable=assignment-from-no-return
         lemTopics = graph.run(
             "MATCH (n:Document {{docId:'{}'}})-->(c:Content)-->(i:Idea)-->(l:Lemma {{pos:'NOUN'}}) WHERE NOT l.name IN ['thing', 'something', 'someone', 'way', 'lot', 'minute', 'hour', 'day', 'week', 'year', 'today', 'tomorrow', 'time', 'reason', 'point', 'detail'] RETURN ID(l) as id,  SIZE(COLLECT(i)) as cnt ORDER BY cnt DESC LIMIT 10".format(self.docId)).data()
+        graph.close()
         for l in lemTopics:
             if l["cnt"] > 2:
                 topics.append({"id": l["id"], "degree": l["cnt"]})
-        print(topics)
         return topics
 
 

@@ -28,7 +28,7 @@ class Document extends Component {
   }
 
   componentDidMount() {
-    fetch(process.env.REACT_APP_SEARCH_DOCUMENT.concat("/" + this.props.docId))
+    fetch(process.env.REACT_APP_READ_DOCUMENT.concat("/" + this.props.docId))
       .then(res => res.json())
       .then(
         results => {

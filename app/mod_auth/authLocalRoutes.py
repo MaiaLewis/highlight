@@ -40,4 +40,4 @@ def account():
 def disconnect():
     flask.session.pop('credentials')
     flask.session['saveStatus'] = 'not_connected'
-    return flask.redirect(flask.url_for('save.clear'))
+    return flask.redirect(flask.url_for('write.clear'))
