@@ -11,11 +11,16 @@ class Result extends Component {
         >
           {result.title}
         </div>
-        <p>{result.author}</p>
+        <p>{result.author.name}</p>
         <p>{result.lastModified}</p>
+        <p>
+          <i>{result.snippet[0].text}</i>
+        </p>
         <ul>
           {result.topics.map(topic => (
-            <li key={topic}>{topic}</li>
+            <li key={topic.id}>
+              {topic.name}, {topic.frequency}
+            </li>
           ))}
         </ul>
       </div>

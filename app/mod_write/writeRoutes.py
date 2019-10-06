@@ -26,7 +26,6 @@ driver = GraphDatabase.driver(
 def writeGraph():
     task = writeDocuments.delay(flask.session['credentials'])
     progressURL = flask.url_for('write.checkProgress', taskId=task.id)
-    print(progressURL)
     flask.session['saveStatus'] = 'saving'
     flask.session['progressURL'] = progressURL
     return json.dumps({'success': True, 'progressURL': progressURL}), 202, {'ContentType': 'application/json'}

@@ -49,7 +49,8 @@ class CreateDocument:
     def processContent(self):
         index = 0
         nlp = spacy.load("en_core_web_sm")
-        for text in nlp.pipe(self.text, disable=["ner"]):
+        nlp.add_pipe(nlp.create_pipe('sentencizer'))
+        for text in nlp.pipe(self.text, disable=["parser", "ner"]):
             newContent = CreateContent(self.levels[index], text)
             self.contents.append(newContent)
             index += 1
@@ -88,8 +89,8 @@ class CreateDocument:
         for content in self.contents:
             contentId = content.save()
             graph = driver.session()  # pylint: disable=assignment-from-no-return
-            graph.run("MATCH (d:Document {{docId:'{}'}}) MATCH (c:Content) WHERE ID(c)={} CREATE (d)-[:Includes {{index: {}}}]->(c)".format(
-                self.docId, contentId, self.contents.index(content)))
+            graph.run("MATCH (d:Document {{docId:'{}'}}) MATCH (c:Content) WHERE ID(c)={} CREATE (d)-[:`{}`]->(c)".format(
+                self.docId, contentId, str(self.contents.index(content))))
             graph.close()
         topics = self.findTopics()
         for topic in topics:
@@ -102,11 +103,18 @@ class CreateDocument:
         topics = []
         graph = driver.session()  # pylint: disable=assignment-from-no-return
         entTopics = graph.run(
-            "MATCH (n:Document {{docId:'{}'}})-->(c:Content)-->(i:Idea)-->(e:Entity) WHERE NOT e.name in ['thing', 'something', 'someone', 'way', 'lot', 'minute', 'hour', 'day', 'week', 'year', 'today', 'tomorrow', 'time', 'reason', 'point', 'detail'] RETURN ID(e) as id,  SIZE(COLLECT(i)) as frq ORDER BY frq DESC LIMIT 10".format(self.docId)).data()
+            "MATCH (n:Document {{docId:'{}'}})-->(c:Content)-->(i:Idea)-->(e:Entity) RETURN ID(e) as id,  SIZE(COLLECT(i)) as frq ORDER BY frq DESC LIMIT 10".format(self.docId)).data()
         graph.close()
         for e in entTopics:
-            if e["frq"] > 2:
+            if e["frq"] > 1:
                 topics.append({"id": e["id"], "frequency": e["frq"]})
+        graph = driver.session()  # pylint: disable=assignment-from-no-return
+        lemTopics = graph.run(
+            "MATCH (n:Document {{docId:'{}'}})-->(c:Content)-->(i:Idea)-->(l:Lemma {{pos:'NOUN'}}) WHERE NOT l.name IN ['thing', 'something', 'someone', 'way', 'lot', 'minute', 'hour', 'day', 'week', 'year', 'today', 'tomorrow', 'time', 'reason', 'point', 'detail'] RETURN ID(l) as id,  SIZE(COLLECT(i)) as frq ORDER BY frq DESC LIMIT 10".format(self.docId)).data()
+        graph.close()
+        for l in lemTopics:
+            if l["frq"] > 2:
+                topics.append({"id": l["id"], "frequency": l["frq"]})
         return topics
 
 
@@ -143,8 +151,8 @@ class CreateContent:
         for idea in self.ideas:
             ideaId = idea.save()
             graph = driver.session()  # pylint: disable=assignment-from-no-return
-            graph.run("MATCH (c:Content) WHERE ID(c)={} MATCH (i:Idea) WHERE ID(i)={} CREATE (c)-[:Includes {{index: {}}}]->(i)".format(
-                contentId, ideaId, self.ideas.index(idea)))
+            graph.run("MATCH (c:Content) WHERE ID(c)={} MATCH (i:Idea) WHERE ID(i)={} CREATE (c)-[:`{}`]->(i)".format(
+                contentId, ideaId, str(self.ideas.index(idea))))
             graph.close()
         return contentId
 
@@ -153,19 +161,23 @@ class CreateIdea:
     def __init__(self,  nlpObject):
         self.nlpObject = nlpObject
         self.text = nlpObject.text
+        self.lemmas = []
         self.entities = []
 
         self.processIdea()
 
     def processIdea(self):
-        for chunk in self.nlpObject.noun_chunks:
-            tokens = []
-            for token in chunk:
-                if token.pos_ in ["NOUN", "PROPN"] and token.text not in ['’s', '"', '_']:
-                    tokens.append(token)
-            if tokens:
-                newEntity = CreateEntity(tokens)
+        for token in self.nlpObject:
+            if token.pos_ in ["VERB", "NOUN"] and token.lemma_ not in ["be", "have", "can", "do"]:
+                newLemma = CreateLemma(token.lemma_, token.pos_)
+                self.lemmas.append(newLemma)
+            elif token.pos_ == "PROPN" and token.text != "’s":
+                newEntity = CreateEntity(token.text, "entity")
                 self.entities.append(newEntity)
+        # for entity in self.nlpObject.ents:
+            # if entity.label_ not in ["DATE", "TIME", "PERCENT", "MONEY", "QUANTITY", "ORDINAL", "CARDINAL"]:
+                # newEntity = CreateEntity(entity.text, entity.label_)
+                # self.entities.append(newEntity)
 
     def save(self):
         graph = driver.session()  # pylint: disable=assignment-from-no-return
@@ -176,28 +188,35 @@ class CreateIdea:
         for entity in self.entities:
             entityId = entity.save()
             graph = driver.session()  # pylint: disable=assignment-from-no-return
-            graph.run("MATCH (i:Idea) WHERE ID(i)={} MATCH (e:Entity) WHERE ID(e)={} MERGE (i)-[:Includes {{index: {}}}]->(e)".format(
-                ideaId, entityId, self.entities.index(entity)))
+            graph.run("MATCH (i:Idea) WHERE ID(i)={} MATCH (e:Entity) WHERE ID(e)={} CREATE (i)-[:`{}`]->(e)".format(
+                ideaId, entityId, str(self.entities.index(entity))))
+            graph.close()
+        for lemma in self.lemmas:
+            lemmaId = lemma.save()
+            graph = driver.session()  # pylint: disable=assignment-from-no-return
+            graph.run(
+                "MATCH (i:Idea) WHERE ID(i)={} MATCH (l:Lemma) WHERE ID(l)={} CREATE (i)-[:`{}`]->(l)".format(ideaId, lemmaId, str(self.lemmas.index(lemma))))
             graph.close()
         return ideaId
 
 
+class CreateLemma:
+    def __init__(self, name, pos):
+        self.name = name
+        self.pos = pos
+
+    def save(self):
+        graph = driver.session()  # pylint: disable=assignment-from-no-return
+        lemmaId = graph.run(
+            "MERGE (l:Lemma {{name: '{}', pos: '{}'}}) RETURN ID(l) AS id".format(self.name, self.pos)).data()[0]["id"]
+        graph.close()
+        return lemmaId
+
+
 class CreateEntity:
-    def __init__(self, nlpObjects):
-        self.nlpObjects = nlpObjects
-        self.name = ""
-        self.entType = "basic"
-
-        self.processEntity()
-
-    def processEntity(self):
-        if len(self.nlpObjects) > 1:
-            self.entType = "named"
-        for token in self.nlpObjects:
-            if token.pos_ == "PROPN":
-                self.entType = "named"
-            self.name = self.name + token.lemma_.lower() + " "
-        self.name = self.name[:-1]
+    def __init__(self, name, entType):
+        self.name = name
+        self.entType = entType
 
     def save(self):
         graph = driver.session()  # pylint: disable=assignment-from-no-return

@@ -10,7 +10,7 @@ class App extends Component {
     saveStatus: "",
     currentDocs: 0,
     totalDocs: 0,
-    status: "",
+    status: "not_connected",
     document: null
   };
 

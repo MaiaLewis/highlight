@@ -5,14 +5,19 @@ class SearchResults extends Component {
   state = {
     error: null,
     isLoaded: false,
-    results: []
+    results: {
+      documents: [],
+      authorFilters: [],
+      topicFilters: [],
+      documentFilters: []
+    }
   };
 
   render() {
     const results = this.state.results;
     return (
       <div>
-        {results.map(result => (
+        {results.documents.map(result => (
           <Result
             key={result.docId}
             result={result}
