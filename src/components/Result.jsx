@@ -3,6 +3,13 @@ import React, { Component } from "react";
 class Result extends Component {
   render() {
     const result = this.props.result;
+    var snippet;
+    if (result.snippet.length > 0) {
+      console.log(result.snippet);
+      snippet = result.snippet[0].text;
+    } else {
+      snippet = null;
+    }
     return (
       <div className="Result">
         <div
@@ -14,7 +21,7 @@ class Result extends Component {
         <p>{result.author.name}</p>
         <p>{result.lastModified}</p>
         <p>
-          <i>{result.snippet[0].text}</i>
+          <i>{snippet}</i>
         </p>
         <ul>
           {result.topics.map(topic => (

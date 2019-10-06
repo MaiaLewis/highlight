@@ -40,7 +40,7 @@ def writeDocuments(self, sessionCredentials):
         credentials = Credentials(**sessionCredentials)
         drive = build('drive', 'v3', credentials=credentials)
         results = drive.files().list(  # pylint: disable=no-member
-            q="mimeType='application/vnd.google-apps.document'", pageSize=10, fields="nextPageToken, files(id, name, owners(displayName), modifiedTime)").execute()
+            q="mimeType='application/vnd.google-apps.document'", pageSize=30, fields="nextPageToken, files(id, name, owners(displayName), modifiedTime)").execute()
         items = results.get('files', [])
         totalDocs = len(items)
         docIndex = 0

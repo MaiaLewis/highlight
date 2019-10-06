@@ -92,7 +92,7 @@ class Graph:
         duplicateTopics = []
         for topic in recentMentionList:
             if topic in recentTopicList:
-                if topic not in allMentionList or recentMentionList.index(topic) - allMentionList.index(topic) <= -5:
+                if topic not in allMentionList or recentMentionList.index(topic) - allMentionList.index(topic) <= 0:
                     trendingTopics.append(
                         recentMentions[recentMentionList.index(topic)])
         for topic in trendingTopics:
