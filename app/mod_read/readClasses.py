@@ -56,9 +56,9 @@ class Graph:
     def data(self):
         documents = self.getDocuments()
         graph = {
-            "topics": [t.data() for t in self.topicFilters],
-            "authors": [a.data() for a in self.authorFilters],
-            "scope": self.documentFilters,
+            "topicFilters": [t.data() for t in self.topicFilters],
+            "authorFilters": [a.data() for a in self.authorFilters],
+            "documentFilters": self.documentFilters,
             "documents": []
         }
         for document in documents:
@@ -92,7 +92,7 @@ class Graph:
         duplicateTopics = []
         for topic in recentMentionList:
             if topic in recentTopicList:
-                if topic not in allMentionList or recentMentionList.index(topic) - allMentionList.index(topic) <= 0:
+                if topic not in allMentionList or recentMentionList.index(topic) - allMentionList.index(topic) <= -2:
                     trendingTopics.append(
                         recentMentions[recentMentionList.index(topic)])
         for topic in trendingTopics:

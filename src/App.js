@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import Header from "./components/Header";
-import SearchResults from "./components/SearchResults";
+import ResultsView from "./components/ResultsView";
 import DocumentView from "./components/DocumentView";
 import "./App.css";
 
@@ -47,7 +47,7 @@ class App extends Component {
       return (
         <React.Fragment>
           <Header onDisconnectDrive={this.handleDisconnectDrive} />
-          <SearchResults onViewDocument={this.handleViewDocument} />
+          <ResultsView onViewDocument={this.handleViewDocument} />
         </React.Fragment>
       );
     }

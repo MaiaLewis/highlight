@@ -1,6 +1,12 @@
 .App {
   text-align: center;
 }
+.ResultContainer {
+  width: 50%;
+  height: 1000px;
+  overflow: hidden;
+  float: left;
+}
 
 .Result {
   background-color: #f4f4f4;
@@ -11,6 +17,8 @@
 .button {
   cursor: pointer;
   color: blue;
+  display: inline;
+  padding-right: 20px;
 }
 
 .Document {

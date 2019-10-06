@@ -9,11 +9,17 @@ mod_read = flask.Blueprint('read', __name__, url_prefix='/read')
 @mod_read.route('/graph')
 def readGraph():
     graph = Graph()
-    print("GET TOPICS")
-    pprint(graph.trendingTopics()[0].data())
     docs = graph.data()
-    pprint(docs)
     return json.dumps(docs)
+
+
+@mod_read.route('/graph/topics')
+def readGraphTopics():
+    topics = []
+    graphs = Graph().trendingTopics()
+    for graph in graphs:
+        topics.append(graph.data())
+    return json.dumps(topics)
 
 
 @mod_read.route('/document/<docId>')

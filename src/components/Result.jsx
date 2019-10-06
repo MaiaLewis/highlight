@@ -5,7 +5,6 @@ class Result extends Component {
     const result = this.props.result;
     var snippet;
     if (result.snippet.length > 0) {
-      console.log(result.snippet);
       snippet = result.snippet[0].text;
     } else {
       snippet = null;
