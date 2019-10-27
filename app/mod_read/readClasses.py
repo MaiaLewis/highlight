@@ -79,11 +79,11 @@ class Graph:
         recentDocs = [d.docId for d in documents]
         graph = driver.session()  # pylint: disable=assignment-from-no-return
         allMentions = graph.run(
-            "MATCH (d:Document)-->(c:Content)-->(i:Idea)-->(e:Entity) RETURN ID(e) AS topic, COLLECT(DISTINCT d.docId) as docs, SIZE(COLLECT(d)) AS frq ORDER BY frq DESC LIMIT 50").data()
+            "MATCH (d:Document)-->(c:Content)-->(i:Idea)-->(e:Entity {entType: 'named'}) RETURN ID(e) AS topic, COLLECT(DISTINCT d.docId) as docs, SIZE(COLLECT(d)) AS frq ORDER BY frq DESC LIMIT 50").data()
         recentMentions = graph.run(
-            "WITH {} as docIds MATCH (d:Document)-->(c:Content)-->(i:Idea)-->(e:Entity) WHERE d.docId IN docIds RETURN ID(e) AS topic, COLLECT(DISTINCT d.docId) as docs, SIZE(COLLECT(d)) AS frq ORDER BY frq DESC LIMIT 20".format(recentDocs)).data()
+            "WITH {} as docIds MATCH (d:Document)-->(c:Content)-->(i:Idea)-->(e:Entity {{entType: 'named'}}) WHERE d.docId IN docIds RETURN ID(e) AS topic, COLLECT(DISTINCT d.docId) as docs, SIZE(COLLECT(d)) AS frq ORDER BY frq DESC LIMIT 20".format(recentDocs)).data()
         recentTopics = graph.run(
-            "WITH {} as docIds MATCH (d:Document)-[:Topic]->(e:Entity) WHERE d.docId IN docIds RETURN ID(e) AS topic, COLLECT(DISTINCT d.docId) as docs, SIZE(COLLECT(d)) AS frq ORDER BY frq DESC LIMIT 50".format(recentDocs)).data()
+            "WITH {} as docIds MATCH (d:Document)-[:Topic]->(e:Entity {{entType: 'named'}}) WHERE d.docId IN docIds RETURN ID(e) AS topic, COLLECT(DISTINCT d.docId) as docs, SIZE(COLLECT(d)) AS frq ORDER BY frq DESC LIMIT 50".format(recentDocs)).data()
         graph.close()
         allMentionList = [t["topic"] for t in allMentions]
         recentMentionList = [t["topic"] for t in recentMentions]

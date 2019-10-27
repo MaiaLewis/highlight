@@ -158,11 +158,13 @@ class CreateIdea:
         self.processIdea()
 
     def processIdea(self):
+        print(self.text)
         for chunk in self.nlpObject.noun_chunks:
             tokens = []
             for token in chunk:
-                if token.pos_ in ["NOUN", "PROPN"] and token.text not in ['’s', '"', '_']:
+                if token.pos_ in ["NOUN", "PROPN"] and token.text not in ['’s', '“', '”', '\"', '_', "’"]:
                     tokens.append(token)
+                    print(token.text)
             if tokens:
                 newEntity = CreateEntity(tokens)
                 self.entities.append(newEntity)
