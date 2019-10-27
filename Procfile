@@ -1,2 +1,2 @@
 web: gunicorn run:app --preload
-worker: celery worker --app=app.mod_save.save.celery
+worker: celery worker --app.mod_write.writeRoutes.celery
